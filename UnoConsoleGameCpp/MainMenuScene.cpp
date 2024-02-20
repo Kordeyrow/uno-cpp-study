@@ -1,5 +1,6 @@
 #include "MainMenuScene.h"
 #include <iostream>
+#include <conio.h>
 
 auto MainMenuScene::Init() -> void
 {
@@ -8,10 +9,7 @@ auto MainMenuScene::Init() -> void
 
 auto MainMenuScene::Run() -> std::shared_ptr<BaseScene>
 {
-    // Step
-    int n;
-    std::cout << "Run" << std::endl;
-    std::cin >> n;
+    // TODO: MainMenu Logic
 
     return shared_from_this();
 }
