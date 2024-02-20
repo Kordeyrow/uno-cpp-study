@@ -1,1 +1,3 @@
-# uno-cpp-study
+# 🔍 Description
+
+🎯 **Goal:** Learn basic C++ features
