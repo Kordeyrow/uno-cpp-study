@@ -127,7 +127,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="UnoConsoleGameCpp.cpp" />
+    <ClCompile Include="BaseScene.cpp" />
+    <ClCompile Include="EntryPoint..cpp" />
+    <ClCompile Include="MainMenuScene.cpp" />
+    <ClCompile Include="UnoSceneManager.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="BaseScene.h" />
+    <ClInclude Include="MainMenuScene.h" />
+    <ClInclude Include="UnoSceneManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

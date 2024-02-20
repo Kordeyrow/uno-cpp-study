@@ -13,10 +13,72 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\CoreSystem">
+      <UniqueIdentifier>{40f415db-dd33-43a9-9795-c1162a2ae11e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\UnoSystem">
+      <UniqueIdentifier>{11052485-a312-4f43-9708-3fef2a3c3e4f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\CoreSystem">
+      <UniqueIdentifier>{e551ef38-95f8-45ec-aee9-0ecebba52d24}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\UnoSystem">
+      <UniqueIdentifier>{593adca4-cd04-4a2d-bc40-005e1280d937}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\CoreSystem\UtilsModules">
+      <UniqueIdentifier>{f0629b7e-f9cc-4970-9ae8-a27a0b739e37}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\CoreSystem\StructureModules">
+      <UniqueIdentifier>{193a5b8a-022c-46c1-87a2-ddb343b526fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\CoreSystem\UtilsModules">
+      <UniqueIdentifier>{d8a6d528-d4a9-4306-94f4-b3fe04ab0f01}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\CoreSystem\StructureModules">
+      <UniqueIdentifier>{f20cd79b-f16a-43c6-b018-ddcd1b05aa84}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\UnoSystem\StructureModules">
+      <UniqueIdentifier>{424e5f83-136e-4f15-a2e7-4bb41a006239}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\UnoSystem\StructureModules\Scenes">
+      <UniqueIdentifier>{1f628692-7d27-4f2f-94b8-5f1f99d61804}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\UnoSystem\StructureModules">
+      <UniqueIdentifier>{d55e0aa6-e10b-4120-a41d-c484a9aa8109}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\CoreSystem\StructureModules\BaseScene">
+      <UniqueIdentifier>{9dd867c4-c8e0-47ba-b79e-6d13f55f1011}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\CoreSystem\StructureModules\BaseScene">
+      <UniqueIdentifier>{ab17a4a4-2cfa-49c6-89ac-a929acd78f31}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\UnoSystem\StructureModules\Scenes">
+      <UniqueIdentifier>{6218bb70-be61-4801-a64e-95b360ad59f3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="UnoConsoleGameCpp.cpp">
+    <ClCompile Include="EntryPoint..cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="UnoSceneManager.cpp">
+      <Filter>Source Files\UnoSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseScene.cpp">
+      <Filter>Source Files\CoreSystem\StructureModules\BaseScene</Filter>
+    </ClCompile>
+    <ClCompile Include="MainMenuScene.cpp">
+      <Filter>Source Files\UnoSystem\StructureModules\Scenes</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="UnoSceneManager.h">
+      <Filter>Header Files\UnoSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseScene.h">
+      <Filter>Header Files\CoreSystem\StructureModules\BaseScene</Filter>
+    </ClInclude>
+    <ClInclude Include="MainMenuScene.h">
+      <Filter>Header Files\UnoSystem\StructureModules\Scenes</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
