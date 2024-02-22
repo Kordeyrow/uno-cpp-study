@@ -1,5 +1,5 @@
-#include "UnoSceneManager.h"
-#include "MainMenuScene.h"
+#include <Uno/Scenes/UnoSceneManager.h>
+#include <Uno/Scenes/MainMenuScene.h>
 
 UnoSceneManager::UnoSceneManager() {
     currentScene = std::make_shared<MainMenuScene>();

@@ -1,5 +1,5 @@
 #pragma once
-#include "BaseScene.h"
+#include <ConsoleCore/BaseScene/BaseScene.h>
 
 class MainMenuScene : public BaseScene {
 public:

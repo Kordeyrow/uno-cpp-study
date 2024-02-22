@@ -55,30 +55,60 @@
     <Filter Include="Source Files\UnoSystem\StructureModules\Scenes">
       <UniqueIdentifier>{6218bb70-be61-4801-a64e-95b360ad59f3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\CoreSystem\BehaviourModules">
+      <UniqueIdentifier>{865ac9a5-7802-4872-bcea-5d51c6627c28}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\CoreSystem\BehaviourModules">
+      <UniqueIdentifier>{4317c9cb-9751-42e6-9c84-9d4388a746f5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\CoreSystem\BehaviourModules\UserInterface">
+      <UniqueIdentifier>{fb3f4862-588d-4e85-85d5-5247d9bfc8ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\CoreSystem\BehaviourModules\UserInterface">
+      <UniqueIdentifier>{a019f9d6-29b7-4e22-9b5b-84a82e8861bc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="EntryPoint..cpp">
+    <ClCompile Include="src\EntryPoint.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="UnoSceneManager.cpp">
+    <ClCompile Include="src\Uno\Scenes\UnoSceneManager.cpp">
       <Filter>Source Files\UnoSystem</Filter>
     </ClCompile>
-    <ClCompile Include="BaseScene.cpp">
+    <ClCompile Include="src\ConsoleCore\BaseScene\BaseScene.cpp">
       <Filter>Source Files\CoreSystem\StructureModules\BaseScene</Filter>
     </ClCompile>
-    <ClCompile Include="MainMenuScene.cpp">
+    <ClCompile Include="src\Uno\Scenes\MainMenuScene.cpp">
       <Filter>Source Files\UnoSystem\StructureModules\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ConsoleCore\UserInterface\UserInterface.cpp">
+      <Filter>Source Files\CoreSystem\BehaviourModules\UserInterface</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ConsoleCore\UserInterface\UserOptionData.cpp">
+      <Filter>Source Files\CoreSystem\BehaviourModules\UserInterface</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ConsoleCore\UserInterface\UserOption.cpp">
+      <Filter>Source Files\CoreSystem\BehaviourModules\UserInterface</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="UnoSceneManager.h">
+    <ClInclude Include="include\Uno\Scenes\UnoSceneManager.h">
       <Filter>Header Files\UnoSystem</Filter>
     </ClInclude>
-    <ClInclude Include="BaseScene.h">
+    <ClInclude Include="include\ConsoleCore\BaseScene\BaseScene.h">
       <Filter>Header Files\CoreSystem\StructureModules\BaseScene</Filter>
     </ClInclude>
-    <ClInclude Include="MainMenuScene.h">
+    <ClInclude Include="include\Uno\Scenes\MainMenuScene.h">
       <Filter>Header Files\UnoSystem\StructureModules\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ConsoleCore\UserInterface\UserInterface.h">
+      <Filter>Header Files\CoreSystem\BehaviourModules\UserInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ConsoleCore\UserInterface\UserOptionData.h">
+      <Filter>Header Files\CoreSystem\BehaviourModules\UserInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ConsoleCore\UserInterface\UserOption.h">
+      <Filter>Header Files\CoreSystem\BehaviourModules\UserInterface</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

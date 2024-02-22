@@ -104,6 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -127,15 +128,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="BaseScene.cpp" />
-    <ClCompile Include="EntryPoint..cpp" />
-    <ClCompile Include="MainMenuScene.cpp" />
-    <ClCompile Include="UnoSceneManager.cpp" />
+    <ClCompile Include="src\ConsoleCore\BaseScene\BaseScene.cpp" />
+    <ClCompile Include="src\EntryPoint.cpp" />
+    <ClCompile Include="src\Uno\Scenes\MainMenuScene.cpp" />
+    <ClCompile Include="src\Uno\Scenes\UnoSceneManager.cpp" />
+    <ClCompile Include="src\ConsoleCore\UserInterface\UserOptionData.cpp" />
+    <ClCompile Include="src\ConsoleCore\UserInterface\UserInterface.cpp" />
+    <ClCompile Include="src\ConsoleCore\UserInterface\UserOption.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BaseScene.h" />
-    <ClInclude Include="MainMenuScene.h" />
-    <ClInclude Include="UnoSceneManager.h" />
+    <ClInclude Include="include\ConsoleCore\BaseScene\BaseScene.h" />
+    <ClInclude Include="include\Uno\Scenes\MainMenuScene.h" />
+    <ClInclude Include="include\Uno\Scenes\UnoSceneManager.h" />
+    <ClInclude Include="include\ConsoleCore\UserInterface\UserOptionData.h" />
+    <ClInclude Include="include\ConsoleCore\UserInterface\UserInterface.h" />
+    <ClInclude Include="include\ConsoleCore\UserInterface\UserOption.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
