@@ -1,11 +1,8 @@
-#include <string>
 #include <sstream>
 #include <thread>
-#include <unordered_map>
-#include <iostream>
 #include <conio.h>
 #include <iostream>
-#include <ConsoleCore/UserInterface/UserInterface.h>
+#include "ConsoleCore/UserInterface/UserInterface.h"
 
 // Keys
 //
@@ -21,7 +18,7 @@
 #define RESET_HIGHLIGHT "\x1b[0m"
 
 
-void UserInterface::AddUserOption(const std::vector<std::shared_ptr<UserOptionData>> optionDataList) {
+void UserInterface::AddUserOptions(const std::vector<std::shared_ptr<UserOptionData>> optionDataList) {
 
 	// Init optionText and 
 	//
@@ -32,7 +29,6 @@ void UserInterface::AddUserOption(const std::vector<std::shared_ptr<UserOptionDa
 	{
 		// Construct optionText
 		//
-		optionText << " ";
 		optionText << std::to_string(optionInputNumber);
 		optionText << ". ";
 		optionText << optionData->GetDescription();
@@ -63,7 +59,6 @@ void UserInterface::ShowOptions(int selectedIndex, bool chosen = false)
 	// Build options text
 	//
 	std::stringstream optionsText;
-	optionsText << '\n';
 
 	int currentIndex = 0;
 	for (const auto& pair : optionFromKey)
@@ -79,10 +74,13 @@ void UserInterface::ShowOptions(int selectedIndex, bool chosen = false)
 				optionsText << SELECTION_HIGHLIGHT;
 		}
 
-		optionsText << option->text << '\n';
+		optionsText << option->text;
 
 		if (currentIndex == selectedIndex)
 			optionsText << RESET_HIGHLIGHT;
+
+		if (currentIndex < optionFromKey.size() - 1)
+			optionsText << '\n' << " ";
 
 		currentIndex++;
 	}
@@ -105,7 +103,7 @@ auto UserInterface::ClearConsole() -> void const {
 	system("CLS");
 }
 
-std::shared_ptr<BaseScene> UserInterface::ReadOptionAndExecute() {
+void UserInterface::ReadOptionAndExecute() {
 
 	ShowOptions(currentSelectedIndex);
 
@@ -127,7 +125,7 @@ std::shared_ptr<BaseScene> UserInterface::ReadOptionAndExecute() {
 		if (moveSelectedIndex != 0) {
 			currentSelectedIndex = (currentSelectedIndex + moveSelectedIndex) % optionFromKey.size();
 			SetUserMessage("");
-			return nullptr;
+			return;
 			//return nullptr;
 		}
 	}
@@ -172,15 +170,13 @@ std::shared_ptr<BaseScene> UserInterface::ReadOptionAndExecute() {
 		// Execute option
 		//
 		std::cout << input << std::endl;
-		return optionFromKey[input]->userOptionData->Execute();
+		optionFromKey[input]->userOptionData->Execute();
 	}
 	else {
 		// Inform invalid option
 		//
 		SetUserMessage("Invalid selection. Please try again.");
 	}
-
-	return nullptr;
 }
 
 auto UserInterface::Draw() -> void
@@ -190,10 +186,10 @@ auto UserInterface::Draw() -> void
 	// Build screenData
 	// 
 	std::stringstream screenData;
-	screenData << title << std::endl << std::endl;
-	screenData << scene << std::endl << std::endl;
-	screenData << userOptions << std::endl << std::endl;
-	screenData << userMessage << std::endl << std::endl;
+	screenData << " " << title << std::endl << std::endl;
+	screenData << " " << scene << std::endl << std::endl;
+	screenData << " " << userOptions << std::endl << std::endl;
+	screenData << " " << userMessage << std::endl << std::endl;
 	screenData << std::endl;
 
 	// Print screenData
@@ -224,17 +220,17 @@ auto UserInterface::SetUserMessage(const std::string& _userMessage) -> void
 
 auto UserInterface::AddTitle(const std::string& _title) -> void
 {
-	title = '\n' + _title;
+	title = _title;
 }
 auto UserInterface::AddScene(const std::string& _scene) -> void
 {
-	scene = '\n' + _scene;
+	scene = _scene;
 }
 auto UserInterface::AddUserOption(const std::string& _userOptions) -> void
 {
-	userOptions = '\n' + _userOptions;
+	userOptions = _userOptions;
 }
 auto UserInterface::AddUserMessage(const std::string& _userMessage) -> void
 {
-	userMessage = '\n' + _userMessage;
+	userMessage = _userMessage;
 }

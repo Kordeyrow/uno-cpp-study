@@ -7,10 +7,10 @@
 class UserInterface {
 public:
     UserInterface() = default;
-    void AddUserOption(const std::vector<std::shared_ptr<UserOptionData>> option);
+    void AddUserOptions(std::vector<std::shared_ptr<UserOptionData>> option);
     void ClearOptions();
     void ShowOptions(int selectedIndex, bool chosen);
-    std::shared_ptr<BaseScene> ReadOptionAndExecute();
+    void ReadOptionAndExecute();
 
     auto Draw() -> void;
 

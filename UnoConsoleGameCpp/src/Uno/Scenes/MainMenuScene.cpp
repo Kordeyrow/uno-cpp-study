@@ -1,29 +1,18 @@
-#include <iostream>
-#include <conio.h>
-#include <vector>
-#include <Uno/Scenes/MainMenuScene.h>
-#include <ConsoleCore/UserInterface/UserInterface.h>
-#include <ConsoleCore/UserInterface/UserOption.h>
+#include "Uno/Scenes/MainMenuScene.h"
+
+MainMenuScene::MainMenuScene() 
+    : matchSetupMenu { userInterface } 
+{
+}
 
 auto MainMenuScene::Init() -> void
 {
-
+    userInterface->SetTitle("--[ MAIN MENU ]--");
+    userInterface->AddUserOptions(matchSetupMenu.GetUserActions());
 }
 
 auto MainMenuScene::Run() -> std::shared_ptr<BaseScene>
 {
-    // TODO: MainMenu Logic
-
-    // Placeholder UserInterface test
-    //
-    UserInterface ui;
-    ui.AddUserOption(std::vector<std::shared_ptr<UserOptionData>> {
-        std::make_shared<UserOptionData>(
-            "hi", 
-            [](){ return nullptr; }
-        ) 
-    });
-    ui.ReadOptionAndExecute();
-
+    userInterface->ReadOptionAndExecute();
     return shared_from_this();
 }

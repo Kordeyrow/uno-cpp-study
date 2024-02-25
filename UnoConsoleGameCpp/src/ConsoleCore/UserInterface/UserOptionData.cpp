@@ -1,19 +1,19 @@
-#include <ConsoleCore/BaseScene/BaseScene.h>
-#include <ConsoleCore/UserInterface/UserOptionData.h>
+#include "ConsoleCore/UserInterface/UserOptionData.h"
 
 UserOptionData::UserOptionData(
     const std::string& desc, 
-    std::function<std::shared_ptr<BaseScene>()> actionFunc)
+    std::function<void()> actionFunc)
     : 
     description(desc), 
-    action(std::move(actionFunc)) {}
+    action(std::move(actionFunc)) 
+{
+}
 
 std::string UserOptionData::GetDescription() const {
     return description;
 }
 
-std::shared_ptr<BaseScene> UserOptionData::Execute() const {
+void UserOptionData::Execute() {
     if (action)
-        return action();
-    return nullptr;
+        action();
 }

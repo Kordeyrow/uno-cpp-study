@@ -1,7 +1,4 @@
-#include <string>
-#include <memory>
-#include <ConsoleCore/UserInterface/UserOption.h>
-#include <ConsoleCore/UserInterface/UserOptionData.h>
+#include "ConsoleCore/UserInterface/UserOption.h"
 
 UserOption::UserOption(
 	int inputNumberKey,

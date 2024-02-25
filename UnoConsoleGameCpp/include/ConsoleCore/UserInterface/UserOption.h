@@ -1,13 +1,13 @@
 #pragma once
 #include <string>
 #include <memory>
-#include <ConsoleCore/UserInterface/UserOptionData.h>
+#include "UserOptionData.h"
 
 class UserOption {
 public:
 	UserOption(
 		int inputNumberKey,
-		const std::string& optionText,
+		const std::string& text,
 		std::shared_ptr<UserOptionData> userOptionData);
 public:
 	int inputNumberKey;

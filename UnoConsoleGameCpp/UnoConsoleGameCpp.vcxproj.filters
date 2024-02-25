@@ -72,7 +72,7 @@
     <ClCompile Include="src\EntryPoint.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Uno\Scenes\UnoSceneManager.cpp">
+    <ClCompile Include="src\Uno\UnoSceneManager.cpp">
       <Filter>Source Files\UnoSystem</Filter>
     </ClCompile>
     <ClCompile Include="src\ConsoleCore\BaseScene\BaseScene.cpp">
@@ -90,9 +90,15 @@
     <ClCompile Include="src\ConsoleCore\UserInterface\UserOption.cpp">
       <Filter>Source Files\CoreSystem\BehaviourModules\UserInterface</Filter>
     </ClCompile>
+    <ClCompile Include="src\Uno\Match\MatchSetupMenu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ConsoleCore\UserInterface\UserOptionHolder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Uno\Scenes\UnoSceneManager.h">
+    <ClInclude Include="include\Uno\UnoSceneManager.h">
       <Filter>Header Files\UnoSystem</Filter>
     </ClInclude>
     <ClInclude Include="include\ConsoleCore\BaseScene\BaseScene.h">
@@ -109,6 +115,12 @@
     </ClInclude>
     <ClInclude Include="include\ConsoleCore\UserInterface\UserOption.h">
       <Filter>Header Files\CoreSystem\BehaviourModules\UserInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Uno\Match\MatchSetupMenu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ConsoleCore\UserInterface\UserOptionHolder.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
