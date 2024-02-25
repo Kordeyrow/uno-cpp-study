@@ -4,9 +4,10 @@ UserOptionData::UserOptionData(
     const std::string& desc, 
     std::function<void()> actionFunc)
     : 
-    description(desc), 
-    action(std::move(actionFunc)) 
+    action { actionFunc },
+    description(desc)
 {
+
 }
 
 std::string UserOptionData::GetDescription() const {

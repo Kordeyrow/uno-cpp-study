@@ -1,9 +1,12 @@
 #include "Uno/Match/MatchSetupMenu.h"
+#include <Uno/Scenes/GameplayScene.h>
 
 MatchSetupMenu::MatchSetupMenu(
-    std::shared_ptr<UserInterface> userInterface)
-    : 
-    userInterface{ userInterface }
+    std::shared_ptr<UserInterface> userInterface,
+    std::function<void(std::shared_ptr<BaseScene>)> _setNextScene)
+    :
+    userInterface{ userInterface },
+    setNextScene{ _setNextScene }
 {
     CreateUserActions();
 }
@@ -29,6 +32,7 @@ void MatchSetupMenu::CreateUserActions()
 
 void MatchSetupMenu::StartGame() {
     userInterface->SetScene("Starting game...");
+    setNextScene(std::make_shared<GameplayScene>());
 }
 
 void MatchSetupMenu::ViewRules() {

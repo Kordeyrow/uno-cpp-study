@@ -5,7 +5,7 @@
 
 class UserOptionHolder {
 public:
-    auto GetUserActions() -> std::vector<std::shared_ptr<UserOptionData>> const;
+    auto GetUserOptionDataList() -> std::vector<std::shared_ptr<UserOptionData>> const;
 protected:
     std::vector<std::shared_ptr<UserOptionData>> userOptionDataList;
 };
