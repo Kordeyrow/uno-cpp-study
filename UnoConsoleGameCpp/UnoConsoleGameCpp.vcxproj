@@ -131,6 +131,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Uno\Match\Entities\Components\Card.cpp" />
+    <ClCompile Include="src\Uno\Match\Entities\Components\CardAction.cpp" />
+    <ClCompile Include="src\Uno\Match\Entities\Components\Hand.cpp" />
+    <ClCompile Include="src\Uno\Match\Entities\Duelist.cpp" />
     <ClCompile Include="src\Uno\Scenes\GameplayScene.cpp" />
     <ClCompile Include="src\Uno\Match\MatchSceneView.cpp" />
     <ClCompile Include="src\Uno\Match\MatchSetupMenu.cpp" />
@@ -144,6 +148,10 @@
     <ClCompile Include="src\ConsoleCore\UserInterface\UserOptionHolder.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Uno\Match\Entities\Components\Card.h" />
+    <ClInclude Include="include\Uno\Match\Entities\Components\CardAction.h" />
+    <ClInclude Include="include\Uno\Match\Entities\Components\Hand.h" />
+    <ClInclude Include="include\Uno\Match\Entities\Duelist.h" />
     <ClInclude Include="include\Uno\Scenes\GameplayScene.h" />
     <ClInclude Include="include\ConsoleCore\BaseScene\BaseScene.h" />
     <ClInclude Include="include\Uno\Scenes\MainMenuScene.h" />

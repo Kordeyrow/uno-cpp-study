@@ -14,16 +14,16 @@ MatchSetupMenu::MatchSetupMenu(
 void MatchSetupMenu::CreateUserActions()
 {
     userOptionDataList.push_back(std::make_shared<UserOptionData>(
-        "Play",
-        std::bind(&MatchSetupMenu::StartGame, this)));
+        "Configure Match",
+        std::bind(&MatchSetupMenu::ConfigureMatch, this)));
 
     userOptionDataList.push_back(std::make_shared<UserOptionData>(
         "View Rules",
         std::bind(&MatchSetupMenu::ViewRules, this)));
 
-    userOptionDataList.push_back(std::make_shared<UserOptionData>(
+    /*userOptionDataList.push_back(std::make_shared<UserOptionData>(
         "Configure Match",
-        std::bind(&MatchSetupMenu::ConfigureMatch, this)));
+        std::bind(&MatchSetupMenu::ConfigureMatch, this)));*/
 
     userOptionDataList.push_back(std::make_shared<UserOptionData>(
         "Exit",
@@ -32,7 +32,6 @@ void MatchSetupMenu::CreateUserActions()
 
 void MatchSetupMenu::StartGame() {
     userInterface->SetScene("Starting game...");
-    setNextScene(std::make_shared<GameplayScene>());
 }
 
 void MatchSetupMenu::ViewRules() {
@@ -41,8 +40,10 @@ void MatchSetupMenu::ViewRules() {
 
 void MatchSetupMenu::ConfigureMatch() {
     userInterface->SetScene("Configuring up match...");
+    setNextScene(std::make_shared<GameplayScene>());
 }
 
 void MatchSetupMenu::Exit() {
     userInterface->SetScene("Exiting game...");
+    setNextScene(nullptr);
 }

@@ -5,13 +5,18 @@ UserOptionData::UserOptionData(
     std::function<void()> actionFunc)
     : 
     action { actionFunc },
-    description(desc)
+    description( std::string(desc) )
 {
 
 }
 
 std::string UserOptionData::GetDescription() const {
     return description;
+}
+
+void UserOptionData::SetDescription(const std::string& desc)
+{
+    description = desc;
 }
 
 void UserOptionData::Execute() {

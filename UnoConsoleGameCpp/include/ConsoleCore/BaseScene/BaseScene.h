@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include "ConsoleCore/UserInterface/UserInterface.h"
 
 class BaseScene : public std::enable_shared_from_this<BaseScene> {

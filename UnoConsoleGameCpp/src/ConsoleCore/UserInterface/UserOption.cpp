@@ -10,3 +10,7 @@ UserOption::UserOption(
 	userOptionData{ userOptionData }
 {
 }
+
+std::unique_ptr<UserOption> UserOption::Clone() {
+	return std::make_unique<UserOption>(*this);
+}

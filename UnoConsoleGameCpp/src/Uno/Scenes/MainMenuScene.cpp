@@ -9,17 +9,12 @@ auto MainMenuScene::Init() -> void
 {
     userInterface->SetTitle("--[ MAIN MENU ]--");
     userInterface->AddUserOptions(matchSetupMenu.GetUserOptionDataList());
+    nextScene = shared_from_this();
 }
 
 auto MainMenuScene::Run() -> std::shared_ptr<BaseScene>
 {
     userInterface->ReadOptionAndExecute();
-
-    // TODO: 
-    // Move to BaseScene Init()
-    //
-    if (nextScene == nullptr)
-        nextScene = shared_from_this();
 
     return nextScene;
 }

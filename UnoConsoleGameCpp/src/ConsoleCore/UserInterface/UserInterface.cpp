@@ -52,10 +52,14 @@ void UserInterface::AddUserOptions(const std::vector<std::shared_ptr<UserOptionD
 
 void UserInterface::ClearOptions() {
 	optionFromKey.clear();
+	currentSelectedIndex = 0;
 }
 
-void UserInterface::ShowOptions(int selectedIndex, bool chosen = false)
+void UserInterface::ShowOptions(int selectedIndex, bool chosen)
 {
+	if (selectedIndex == -1)
+		selectedIndex = currentSelectedIndex;
+
 	// Build options text
 	//
 	std::stringstream optionsText;
@@ -103,17 +107,12 @@ auto UserInterface::ClearConsole() -> void const {
 	system("CLS");
 }
 
-void UserInterface::ReadOptionAndExecute() {
+char UserInterface::GetChar() {
+	return _getch();
+}
 
-	ShowOptions(currentSelectedIndex);
-
-	// Read choise or arrow
-	//
-	auto input = ReadInputKey();
-	int chosenOptionIndex = -1;
-
-	// If "Arrow" input
-	//
+bool UserInterface::ArrowMoveSelection(char input)
+{
 	if (input == ARROW_KEY) {
 		// Move selected index
 		//
@@ -123,13 +122,36 @@ void UserInterface::ReadOptionAndExecute() {
 			: (input == KEY_DOWN) ? +1
 			: 0;
 		if (moveSelectedIndex != 0) {
-			currentSelectedIndex = (currentSelectedIndex + moveSelectedIndex) % optionFromKey.size();
+			if (currentSelectedIndex + moveSelectedIndex == -1) {
+				currentSelectedIndex = optionFromKey.size() - 1;
+			}
+			else {
+				currentSelectedIndex = (currentSelectedIndex + moveSelectedIndex) % optionFromKey.size();
+			}
 			SetUserMessage("");
-			return;
-			//return nullptr;
+			return true;
 		}
 	}
-	// If "Enter" input
+	return false;
+}
+
+void UserInterface::ReadOptionAndExecute(char input) {
+
+	ShowOptions(currentSelectedIndex);
+
+	// Input
+	//
+	if (input == -1) {
+		input = ReadInputKey();
+	}
+	int chosenOptionIndex = -1;
+
+	// Change selection
+	//
+	if (ArrowMoveSelection(input))
+		return;
+
+	// Execute chosen
 	//
 	else if (input == ENTER_KEY) {
 		chosenOptionIndex = currentSelectedIndex;
@@ -177,6 +199,16 @@ void UserInterface::ReadOptionAndExecute() {
 		//
 		SetUserMessage("Invalid selection. Please try again.");
 	}
+}
+
+UserInterface UserInterface::GetState()
+{
+	return *this;
+}
+
+void UserInterface::SetState(UserInterface stateCopy)
+{
+	//return *this;
 }
 
 auto UserInterface::Draw() -> void
