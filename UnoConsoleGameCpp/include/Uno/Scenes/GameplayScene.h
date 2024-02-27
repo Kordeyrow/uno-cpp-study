@@ -13,9 +13,11 @@ public:
     void IncreaseTotalDuelists();
     void DecreaseTotalDuelists();
     void Play();
+    void DrawTable(UserInterface* ui);
 private:
     int maxDuelists = 12;
     int minDuelists = 2;
+    int duelistInitialHandSize = 7;
     std::vector<std::shared_ptr<Duelist>> duelists;
     bool endSetPlayers = false;
 };

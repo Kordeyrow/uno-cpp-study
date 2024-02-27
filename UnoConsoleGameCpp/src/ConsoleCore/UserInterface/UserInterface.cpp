@@ -191,7 +191,7 @@ void UserInterface::ReadOptionAndExecute(char input) {
 
 		// Execute option
 		//
-		std::cout << input << std::endl;
+		//std::cout << input << std::endl;
 		optionFromKey[input]->userOptionData->Execute();
 	}
 	else {
