@@ -164,7 +164,7 @@ void DrawDuelist(const Duelist& duelist, int x, int y, std::vector<std::string>&
     asciiTable[y].replace(labelStartX, playerLabel.length(), playerLabel);
 
     // Get the player's hand and print it as '*' characters
-    std::string handString = duelist.hand->printHand();
+    std::string handString = duelist.hand->PrintHand();
 
     // Calculate the starting position for the player's hand
     int handStartX = x - handString.length() / 2;

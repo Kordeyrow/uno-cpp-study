@@ -1,9 +1,9 @@
 #include "Uno/Match/Entities/Components/Hand.h"
 
-int Hand::getHandSize() const {
+int Hand::GetHandSize() const {
     return deck.size();
 }
 
-std::string Hand::printHand() const {
-    return std::string(getHandSize(), '*');
+std::string Hand::PrintHand() const {
+    return std::string(GetHandSize(), '*');
 }
