@@ -2,10 +2,6 @@
 #include <string>
 #include <random>
 
-constexpr auto RED = 31;
-constexpr auto GREEN = 32;
-constexpr auto YELLOW = 33;
-constexpr auto BLUE = 34;
 
 
 class Card {
@@ -14,21 +10,51 @@ private:
 	std::string description;
 
 public:
-	Card(const std::string& desc, int color) : description{ desc }, color{ color } {
-		std::srand(static_cast<unsigned int>(std::time(nullptr)));
+
+	// Color IDs
+	//
+	constexpr static int RED = 31;
+	constexpr static int GREEN = 32;
+	constexpr static int YELLOW = 33;
+	constexpr static int BLUE = 34;
+
+	// Type IDs (description)
+	//
+	constexpr static int NUMBERED = 1;
+	constexpr static int DRAW_2 = 2;
+	constexpr static int REVERSE = 3;
+	constexpr static int SKIP = 4;
+	constexpr static int WILD_DRAW_4 = 5;
+
+	int typeID;
+	int colorID;
+	int number;
+
+	Card(int typeID, int color, int number = -1)
+		: typeID{ typeID }, colorID{ color }, number{ number }
+	{
+		if (typeID == NUMBERED) {
+			description = std::to_string(number);
+		}
+		else if (typeID == DRAW_2) {
+			description = "Draw + 2";
+		}
+		else if (typeID == REVERSE) {
+			description = "Reverse";
+		}
+		else if (typeID == SKIP) {
+			description = "Skip";
+		}
+		else if (typeID == WILD_DRAW_4) {
+			description = "Wild Draw +4";
+		}
 	}
 
-	std::string ColoredDescription() { return startColor + " " + description + " " + resetColor /*+ " " + colorBox*/; }
+	constexpr static int colors[4] = { RED, GREEN, YELLOW, BLUE };
 
-	int color = 31;
-
-	std::string startColor = "\x1b[1;" + std::to_string(color + 10) + "m";
-	//std::string startColorBackground = "\x1b[1;" + std::to_string(color) + ";""m";
+	std::string ColoredDescription() { return startColor + " " + description + " " + resetColor; }
+	std::string startColor = "\x1b[1;" + std::to_string(colorID + 10) + "m"; // +10 because background ranges grom 40 to 49 / foreground 30 to 39
 	std::string resetColor = "\x1b[0m";
-
-	//std::string startColor = "\x1b[1;" + std::to_string(color) + "m";
-	std::string colorBox = "\x1b[1;" + std::to_string(color + 10) + "m  " + resetColor;
-	//std::string resetColor = "\x1b[0m";
 
 	static int GetRandomColorCode() {
         static std::random_device rd; // Obtain a random number from hardware
