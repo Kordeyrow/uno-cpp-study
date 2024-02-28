@@ -4,6 +4,7 @@
 #include "ConsoleCore/BaseScene/BaseScene.h"
 #include <Uno/Match/Entities/Duelist.h>
 #include <conio.h>
+#include <algorithm> // For std::shuffle
 
 class GameplayScene : public BaseScene {
 public:
@@ -116,6 +117,16 @@ private:
     int duelistInitialHandSize = 7;
     bool endSetPlayers = false;
     std::vector<std::shared_ptr<Duelist>> duelists;
-    std::vector<Card> matchDeck = CreateMatchDeck();
+    std::vector<Card> matchDeck = ShuffleDeck(CreateMatchDeck());
+
+    std::vector<Card>& ShuffleDeck(std::vector<Card>& deck) {
+        // Create a random number generator
+        std::random_device rd; // Obtain a random number from hardware
+        std::mt19937 g(rd()); // Seed the generator
+
+        // Shuffle the cards
+        std::shuffle(deck.begin(), deck.end(), g);
+        return deck;
+    }
 };
 

@@ -2,6 +2,10 @@
 #include <sstream>
 #include "Uno/Scenes/GameplayScene.h"
 
+#define MAX(x, y) (((x) > (y)) ? (x) : (y))
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
+#define CLAMP(x, upper, lower) (MIN(upper, MAX(x, lower)))
+
 #define SIMPLE_FUNC_REF(callable, arg) [&]() { callable(arg); }
 //#define FuncRef(func) std::bind(&decltype(*this)::func, this)
 #define MEMBER_FUNC_REF(func) std::bind(&std::remove_reference<decltype(*this)>::type::func, this)
@@ -295,52 +299,75 @@ void GameplayScene::DrawTable(UserInterface* ui) {
 
 void GameplayScene::Play()
 {
-
-    // Keep state (only change copy)
+    // MatchUI
     //
-    auto uiCopy = *userInterface;
+    UserInterface matchUI = *userInterface; // Keep state (only change copy)
 
-    // Setup players naming UI
+    // use_card_func
     //
-    UserInterface matchUI = uiCopy;
-
-    matchUI.currentSelectedIndex = 0;
-
-
-    /////////////////////////////////////////////////////////////////////////////////////////////
-
     auto use_card_func = [](Card& card)
     {
         std::cout << card.ColoredDescription() << "\n";
     };
 
-    matchUI.ClearOptions();
-
-    auto& player = duelists[0];
-    auto& player_deck = player->hand->deck;
-    for (size_t i = 0; i < player_deck.size(); i++)
+    // Init Duelists card
+    //
+    for (size_t duelist_index = 0; duelist_index < duelists.size(); duelist_index++)
     {
-        auto& card = player_deck[i];
-        matchUI.AddUserOptions({
-               std::make_shared<UserOptionData>(
-               card.ColoredDescription(),
-               SIMPLE_FUNC_REF(use_card_func, card))
-            });
+        // Give total (duelistInitialHandSize) cards 
+        //  for each duelist, from shuffled matchDeck
+        //
+        for (size_t card_count = 0; card_count < 15; card_count++)
+        {
+            Card& topCard = matchDeck.back();
+            duelists[duelist_index]->hand->deck.push_back(topCard);
+            matchDeck.pop_back();
+        }
     }
 
+    // Print MatchDeck
+    //
+    /*for (Card& card : matchDeck) {
+        std::cout << card.ColoredDescription() << std::endl;
+    }
+    _getch();*/
+
+    int lastOptionIndex = 0;
+
+    // Turn Manager 
+    //
     while (true) {
 
-        DrawTable(&matchUI);
-        // Options: Player cards 
+        // Draw
         //
-        
-        /*matchUI.AddUserOptions({
-               std::make_shared<UserOptionData>(
-               "Back",
-               FUNC_REF(BackFromSetPlayersNames))
-            });*/
+        DrawTable(&matchUI);
+
+        // Options (player cards)
+        //
+        matchUI.ClearOptions();
+        auto& player = duelists[0];
+        auto& player_deck = player->hand->deck;
+        for (size_t i = 0; i < player_deck.size(); i++)
+        {
+            auto& card = player_deck[i];
+            matchUI.AddUserOptions({
+                   std::make_shared<UserOptionData>(
+                   card.ColoredDescription(),
+                   SIMPLE_FUNC_REF(use_card_func, card))
+                });
+        }
+
+        // As options reset, selection was lost
+        //
+        matchUI.currentSelectedIndex = lastOptionIndex;
+
         matchUI.ShowOptions();
+
+        // Action
+        //
         matchUI.ReadOptionAndExecute();
+
+        lastOptionIndex = matchUI.currentSelectedIndex;
 
         // Duelists names
         //

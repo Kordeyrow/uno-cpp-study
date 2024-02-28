@@ -28,7 +28,7 @@ public:
 
 	int typeID;
 	int colorID;
-	int number;
+	int number = -1;
 
 	Card(int typeID, int color, int number = -1)
 		: typeID{ typeID }, colorID{ color }, number{ number }
@@ -37,7 +37,7 @@ public:
 			description = std::to_string(number);
 		}
 		else if (typeID == DRAW_2) {
-			description = "Draw + 2";
+			description = "Draw +2";
 		}
 		else if (typeID == REVERSE) {
 			description = "Reverse";

@@ -5,7 +5,8 @@
 
 class Hand {
 public:
-    std::vector<Card> deck = {
+    std::vector<Card> deck; 
+    /*= {
         Card {
             Card::NUMBERED,
             Card::GetRandomColorCode(),
@@ -27,7 +28,7 @@ public:
             Card::WILD_DRAW_4,
             Card::GetRandomColorCode()
         },
-    };
+    };*/
     int GetHandSize() const;
     std::string PrintHand() const;
 };

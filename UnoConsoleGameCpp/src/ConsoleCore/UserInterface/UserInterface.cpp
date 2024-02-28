@@ -116,7 +116,7 @@ void getConsoleSize(int& width, int& height) {
 
 
 // Function to print the pattern adjusted to the console width
-void printAdjustedPattern() {
+void PrintCleanScreen() {
 	int consoleWidth, consoleHeight;
 	getConsoleSize(consoleWidth, consoleHeight);
 	char fill = ' ';
@@ -146,7 +146,7 @@ auto UserInterface::ClearConsole() -> void const {
 	cursorPosition.X = 0;	
 	cursorPosition.Y = 0;	
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), cursorPosition);
-	printAdjustedPattern();
+	PrintCleanScreen();
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), cursorPosition);
 	/*std::cout << 
 		"-          |          |          |          |          |          |          |          |          |          |\n"
@@ -345,11 +345,10 @@ auto UserInterface::Draw() -> void
 	// Build screenData
 	// 
 	std::stringstream screenData;
-	screenData << " " << title << std::endl << std::endl;
-	screenData << " " << scene << std::endl << std::endl;
-	screenData << " " << userOptions << std::endl << std::endl;
-	screenData << " " << userMessage << std::endl << std::endl;
-	screenData << std::endl;
+	screenData << " " << title << std::endl ;
+	screenData << " " << scene << std::endl ;
+	screenData << " " << userOptions << std::endl ;
+	screenData << " " << userMessage;
 
 	// Print screenData
 	// 
