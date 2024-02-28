@@ -2,6 +2,7 @@
 #include <thread>
 #include <conio.h>
 #include <iostream>
+#include <windows.h>
 #include "ConsoleCore/UserInterface/UserInterface.h"
 
 // Keys
@@ -103,8 +104,135 @@ auto UserInterface::ReadInputKey() -> char const {
 	return _getch();
 }
 
+
+// Function to get the console width
+void getConsoleSize(int& width, int& height) {
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+
+	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+	width = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+	height = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+}
+
+
+// Function to print the pattern adjusted to the console width
+void printAdjustedPattern() {
+	int consoleWidth, consoleHeight;
+	getConsoleSize(consoleWidth, consoleHeight);
+	char fill = ' ';
+
+	// Build one line of the pattern
+	std::string line(consoleWidth, fill);
+
+	// Create the entire output as one string
+	std::string output;
+	for (int i = 0; i < consoleHeight; i++) {
+		output += line + "\n";
+	}
+
+	// Print the entire output in one operation
+	std::cout << output;
+}
+
+
 auto UserInterface::ClearConsole() -> void const {
-	system("CLS");
+	//system("CLS");
+
+
+
+
+
+	COORD cursorPosition;	
+	cursorPosition.X = 0;	
+	cursorPosition.Y = 0;	
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), cursorPosition);
+	printAdjustedPattern();
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), cursorPosition);
+	/*std::cout << 
+		"-          |          |          |          |          |          |          |          |          |          |\n"
+		"-          |          |          |          |          |          |          |          |          |          |\n"
+		"-          |          |          |          |          |          |          |          |          |          |\n"
+		"-          |          |          |          |          |          |          |          |          |          |\n"
+		"-          |          |          |          |          |          |          |          |          |          |\n"
+		"-          |          |          |          |          |          |          |          |          |          |\n"
+		"-          |          |          |          |          |          |          |          |          |          |\n"
+		"-          |          |          |          |          |          |          |          |          |          |\n"
+		"-          |          |          |          |          |          |          |          |          |          |\n"
+		"-          |          |          |          |          |          |          |          |          |          |\n"
+
+		"-          |          |          |          |          |          |          |          |          |          |\n"
+		"-          |          |          |          |          |          |          |          |          |          |\n"
+		"-          |          |          |          |          |          |          |          |          |          |\n"
+		"-          |          |          |          |          |          |          |          |          |          |\n"
+		"-          |          |          |          |          |          |          |          |          |          |\n"
+		"-          |          |          |          |          |          |          |          |          |          |\n"
+		"-          |          |          |          |          |          |          |          |          |          |\n"
+		"-          |          |          |          |          |          |          |          |          |          |\n"
+		"-          |          |          |          |          |          |          |          |          |          |\n"
+		"-          |          |          |          |          |          |          |          |          |          |\n"
+
+		"-          |          |          |          |          |          |          |          |          |          |\n"
+		"-          |          |          |          |          |          |          |          |          |          |\n"
+		"-          |          |          |          |          |          |          |          |          |          |\n"
+		"-          |          |          |          |          |          |          |          |          |          |\n"
+		"-          |          |          |          |          |          |          |          |          |          |\n"
+		"-          |          |          |          |          |          |          |          |          |          |\n"
+		"-          |          |          |          |          |          |          |          |          |          |\n"
+		"-          |          |          |          |          |          |          |          |          |          |\n"
+		"-          |          |          |          |          |          |          |          |          |          |\n"
+		"-          |          |          |          |          |          |          |          |          |          |\n";
+
+	std::cout <<
+		"-          |          |          |          |          |          |          |          |          |          |\n"
+		"-          |          |          |          |          |          |          |          |          |          |\n"*/
+	//std::cout << "                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n";
+
+
+
+
+
+	//CONSOLE_SCREEN_BUFFER_INFO csbi;
+	//COORD cursorPosition;
+	//HANDLE stdHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+	//DWORD charsWritten;
+	//DWORD consoleSize;
+
+	//// Get the number of character cells in the current buffer
+	//if (!GetConsoleScreenBufferInfo(stdHandle, &csbi)) {
+	//	// Handle the error if necessary
+	//	return;
+	//}
+
+	//consoleSize = csbi.dwSize.X * csbi.dwSize.Y;
+
+	//// Fill the entire screen with blanks
+	//FillConsoleOutputCharacter(
+	//	stdHandle,          // Handle to console screen buffer
+	//	(TCHAR)' ',        // Character to write to the buffer
+	//	consoleSize,        // Number of cells to write to
+	//	{ 0, 0 },             // Coordinates of first cell
+	//	&charsWritten       // Receive number of characters written
+	//);
+
+	//// Get the current text attribute
+	//if (!GetConsoleScreenBufferInfo(stdHandle, &csbi)) {
+	//	// Handle the error if necessary
+	//	return;
+	//}
+
+	//// Set the buffer's attributes accordingly
+	//FillConsoleOutputAttribute(
+	//	stdHandle,          // Handle to console screen buffer
+	//	csbi.wAttributes,   // Character attributes to use
+	//	consoleSize,        // Number of cells to set attribute
+	//	{ 0, 0 },             // Coordinates of first cell
+	//	&charsWritten       // Receive number of characters written
+	//);
+
+	//// Put the cursor at its home coordinates
+	//cursorPosition.X = 0;
+	//cursorPosition.Y = 0;
+	//SetConsoleCursorPosition(stdHandle, cursorPosition);
 }
 
 char UserInterface::GetChar() {
@@ -213,7 +341,6 @@ void UserInterface::SetState(UserInterface stateCopy)
 
 auto UserInterface::Draw() -> void
 {
-	ClearConsole();
 
 	// Build screenData
 	// 
@@ -226,6 +353,7 @@ auto UserInterface::Draw() -> void
 
 	// Print screenData
 	// 
+	ClearConsole();
 	std::cout << screenData.str();
 }
 
