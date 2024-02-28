@@ -317,7 +317,7 @@ void GameplayScene::Play()
         // Give total (duelistInitialHandSize) cards 
         //  for each duelist, from shuffled matchDeck
         //
-        for (size_t card_count = 0; card_count < 15; card_count++)
+        for (size_t card_count = 0; card_count < duelistInitialHandSize; card_count++)
         {
             Card& topCard = matchDeck.back();
             duelists[duelist_index]->hand->deck.push_back(topCard);

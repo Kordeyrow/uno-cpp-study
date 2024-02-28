@@ -18,6 +18,20 @@
 #define CHOSEN_HIGHLIGHT "\x1b[1;30;106m"
 #define RESET_HIGHLIGHT "\x1b[0m"
 
+std::string NumberToAlpha(int number) {
+	if (number < 0 || number > 35) {
+		throw std::invalid_argument("Number out of valid range (0-35)");
+	}
+
+	if (number < 10) {
+		// For 0-9, return the corresponding digit
+		return std::to_string(number);
+	}
+
+	// For 10-35, return 'a'-'z'
+	char letter = 'a' + (number - 10);
+	return std::string(1, letter);
+}
 
 void UserInterface::AddUserOptions(const std::vector<std::shared_ptr<UserOptionData>> optionDataList) {
 
@@ -28,15 +42,15 @@ void UserInterface::AddUserOptions(const std::vector<std::shared_ptr<UserOptionD
 
 	for (const auto& optionData : optionDataList)
 	{
+		char key = *NumberToAlpha(optionInputNumber).c_str();
 		// Construct optionText
 		//
-		optionText << std::to_string(optionInputNumber);
+		optionText << key;
 		optionText << ". ";
 		optionText << optionData->GetDescription();
 
 		// Add option entry (key[char], value[std::unique_ptr<UserOption>>])
 		//
-		auto key = *std::to_string(optionInputNumber).c_str();
 		optionFromKey[key] = std::make_unique<UserOption>(optionInputNumber,
 			optionText.str(),
 			optionData);
