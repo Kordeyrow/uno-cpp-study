@@ -6,7 +6,24 @@
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 #define CLAMP(x, upper, lower) (MIN(upper, MAX(x, lower)))
 
-#define SIMPLE_FUNC_REF(callable, arg) [&]() { callable(arg); }
+//#define SIMPLE_FUNC_REF(callable, arg) [&]() { callable(arg); }
+//#define SIMPLE_FUNC_REF(callable, ...) [__VA_ARGS__]() mutable { callable(__VA_ARGS__); }
+//#define SIMPLE_FUNC_REF(callable, ...) [&]() mutable { callable(__VA_ARGS__); }
+//#define SIMPLE_FUNC_REF(callable, ...) [&, __VA_ARGS__]() mutable { callable(__VA_ARGS__); }
+
+#define SIMPLE_FUNC_REF(callable, ref, val) [&, val]() mutable { callable(ref, val); }
+
+
+// working
+//#define SIMPLE_FUNC_REF(callable, arg1, val) [&, val]() mutable { callable(arg1, val); }
+
+//#define SIMPLE_FUNC_REF(callable, deck, index) [&, indexCopy = index]() mutable { callable(deck, indexCopy); }
+
+
+
+
+
+
 //#define FuncRef(func) std::bind(&decltype(*this)::func, this)
 #define MEMBER_FUNC_REF(func) std::bind(&std::remove_reference<decltype(*this)>::type::func, this)
 
@@ -315,9 +332,22 @@ void GameplayScene::Play()
 
     // use_card_func
     //
-    auto use_card_func = [](Card& card)
+    auto* discardDeckRef = &discardDeck;
+    auto use_card_func = [discardDeckRef](std::vector<Card>& container, int cardIndex)
     {
-        std::cout << card.ColoredDescription() << "\n";
+        auto& card = container[cardIndex];
+        // can use if has same color]
+        //
+        if (card.colorID == discardDeckRef->back().colorID) {
+            
+            // add to discardDeck
+            //
+            discardDeckRef->push_back(card);
+
+            // remove from play deck1
+            //
+            container.erase(container.begin() + cardIndex);
+        }
     };
 
     // Init Duelists card
@@ -363,7 +393,7 @@ void GameplayScene::Play()
             matchUI.AddUserOptions({
                    std::make_shared<UserOptionData>(
                    card.ColoredDescription(),
-                   SIMPLE_FUNC_REF(use_card_func, card))
+                   SIMPLE_FUNC_REF(use_card_func, player_deck, i))
                 });
         }
 
