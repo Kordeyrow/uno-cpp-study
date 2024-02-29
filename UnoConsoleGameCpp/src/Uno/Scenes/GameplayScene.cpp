@@ -165,6 +165,7 @@ void GameplayScene::DecreaseTotalDuelists() {
 #include <vector>
 #define _USE_MATH_DEFINES 
 #include <math.h>
+#include <thread>
 
 // Function to print a single duelist at a given position and their hand of cards.
 void DrawDuelist(const Duelist& duelist, int x, int y, std::vector<std::string>& asciiTable) {
@@ -403,23 +404,19 @@ void GameplayScene::Play()
         // As options reset, selection was lost
         //
         matchUI.currentSelectedIndex = lastOptionIndex;
-
         matchUI.ShowOptions();
-
-        // Action
-        //
-        matchUI.ReadOptionAndExecute();
-
-        lastOptionIndex = matchUI.currentSelectedIndex;
-
 
         if (playerUsedCard) {
 
             playerUsedCard = false;
             // AI duelist turns
             //
-            for (size_t duelist_index = 0; duelist_index < duelists.size(); duelist_index++)
+            for (size_t duelist_index = 1; duelist_index < duelists.size(); duelist_index++)
             {
+                // delay
+                //
+                std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+
                 // Give total (duelistInitialHandSize) cards 
                 //  for each duelist, from shuffled matchDeck
                 //
@@ -442,6 +439,7 @@ void GameplayScene::Play()
                     }
                     //duelists[duelist_index]->hand->deck.push_back(MoveCardFromMatchDeck());
                 }
+                DrawTable(&matchUI);
             }
             /*for (size_t i = 0; i < player_deck.size(); i++)
             {
@@ -453,6 +451,13 @@ void GameplayScene::Play()
                     });
             }*/
         }
+
+        // Player Action
+        //
+        matchUI.ReadOptionAndExecute();
+        lastOptionIndex = matchUI.currentSelectedIndex;
+
+        
 
 
         // Duelists names
