@@ -167,36 +167,88 @@ void GameplayScene::DecreaseTotalDuelists() {
 #include <math.h>
 #include <thread>
 
+
+
+
+
+
+
+
 // Function to print a single duelist at a given position and their hand of cards.
-void DrawDuelist(const Duelist& duelist, int x, int y, std::vector<std::string>& asciiTable) {
+//void DrawDuelist(const Duelist& duelist, int x, int y, std::vector<std::string>& asciiTable) {
+//    int tableWidth = asciiTable[0].size();
+//    int tableHeight = asciiTable.size();
+//
+//    // Generate the player's label with their name
+//    std::string playerLabel = "[" + duelist.name + "]";
+//
+//    // Calculate the starting position for the player's label
+//    int labelStartX = x - playerLabel.length() / 2;
+//
+//    // Make sure the label is within the bounds of the table
+//    if (labelStartX < 0) labelStartX = 0;
+//    if (labelStartX >= tableWidth - playerLabel.length()) labelStartX = tableWidth - playerLabel.length() - 1;
+//
+//    // Print the player's label at the calculated position
+//    asciiTable[y].replace(labelStartX, playerLabel.length(), playerLabel);
+//
+//    // Get the player's hand and print it as '*' characters
+//    std::string handString = duelist.hand->PrintHand();
+//
+//    // Calculate the starting position for the player's hand
+//    int handStartX = x - handString.length() / 2;
+//
+//    // Make sure the hand is within the bounds of the table
+//    if (handStartX < 0) handStartX = 0;
+//    if (handStartX >= tableWidth - handString.length()) handStartX = tableWidth - handString.length() - 1;
+//
+//    // Print the player's hand at the calculated position
+//    asciiTable[y + 1].replace(handStartX, handString.length(), handString);
+//}
+
+
+
+void DrawDuelist(const Duelist& duelist, int x, int y, std::vector<std::string>& asciiTable, bool highlight) {
     int tableWidth = asciiTable[0].size();
     int tableHeight = asciiTable.size();
 
-    // Generate the player's label with their name
+    // ANSI escape code for yellow foreground
+    std::string yellowForeground = "\033[33m";
+    // ANSI escape code to reset styling
+    std::string resetStyle = "\033[0m";
+
     std::string playerLabel = "[" + duelist.name + "]";
+    int playerLabelSize = playerLabel.length();;
+
+    // Generate the player's label with their name
+    playerLabel = highlight ? yellowForeground + playerLabel + resetStyle : playerLabel;
 
     // Calculate the starting position for the player's label
-    int labelStartX = x - playerLabel.length() / 2;
+    int labelStartX = x - playerLabelSize / 2;
 
     // Make sure the label is within the bounds of the table
     if (labelStartX < 0) labelStartX = 0;
-    if (labelStartX >= tableWidth - playerLabel.length()) labelStartX = tableWidth - playerLabel.length() - 1;
+    if (labelStartX + playerLabelSize > tableWidth) labelStartX = tableWidth - playerLabelSize;
 
     // Print the player's label at the calculated position
-    asciiTable[y].replace(labelStartX, playerLabel.length(), playerLabel);
+    asciiTable[y].replace(labelStartX, playerLabelSize, playerLabel);
 
     // Get the player's hand and print it as '*' characters
     std::string handString = duelist.hand->PrintHand();
+    int handStringSize = handString.length();
+    if (highlight) {
+        handString = yellowForeground + handString + resetStyle;
+    }
 
     // Calculate the starting position for the player's hand
-    int handStartX = x - handString.length() / 2;
+    int handStartX = x - handStringSize / 2;
 
     // Make sure the hand is within the bounds of the table
     if (handStartX < 0) handStartX = 0;
-    if (handStartX >= tableWidth - handString.length()) handStartX = tableWidth - handString.length() - 1;
+    if (handStartX + handStringSize > tableWidth) handStartX = tableWidth - handStringSize;
 
     // Print the player's hand at the calculated position
-    asciiTable[y + 1].replace(handStartX, handString.length(), handString);
+    asciiTable[y + 1].replace(handStartX, handStringSize, handString);
 }
 
 // Function to print the top card of the discard deck.
@@ -245,7 +297,7 @@ void DrawLine(int count) {
 
 
 
-void GameplayScene::DrawTable(UserInterface* ui) {
+void GameplayScene::DrawTable(UserInterface* ui, int duelist_index) {
     //while (true) {
         //int totalPlayers;
         //std::cout << "Enter the total number of players (up to 12): ";
@@ -281,7 +333,7 @@ void GameplayScene::DrawTable(UserInterface* ui) {
             int y = static_cast<int>(centerY - (radiusY * sin(angle) / 2));
 
             //Duelist player("Player " + std::to_string(i + 1), 7);
-            DrawDuelist(*duelists[i], x, y, asciiTable);
+            DrawDuelist(*duelists[i], x, y, asciiTable, i == duelist_index);
         }
 
         PrintTopCard(centerX, centerY, asciiTable);
@@ -382,10 +434,6 @@ void GameplayScene::Play()
     //
     while (true) {
 
-        // Draw
-        //
-        DrawTable(&matchUI);
-
         // Options (player cards)
         //
         matchUI.ClearOptions();
@@ -415,6 +463,7 @@ void GameplayScene::Play()
             {
                 // delay
                 //
+                DrawTable(&matchUI, duelist_index);
                 std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 
                 // Give total (duelistInitialHandSize) cards 
@@ -439,7 +488,7 @@ void GameplayScene::Play()
                     }
                     //duelists[duelist_index]->hand->deck.push_back(MoveCardFromMatchDeck());
                 }
-                DrawTable(&matchUI);
+
             }
             /*for (size_t i = 0; i < player_deck.size(); i++)
             {
@@ -451,6 +500,8 @@ void GameplayScene::Play()
                     });
             }*/
         }
+
+        DrawTable(&matchUI, 0);
 
         // Player Action
         //

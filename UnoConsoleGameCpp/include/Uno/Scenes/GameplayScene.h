@@ -22,7 +22,7 @@ public:
     // ==========  Play  ========== //
     //
     void Play();
-    void DrawTable(UserInterface* ui);
+    void DrawTable(UserInterface* ui, int duelist_index);
 
     std::vector<Card>& CreateMatchDeck() {
 
