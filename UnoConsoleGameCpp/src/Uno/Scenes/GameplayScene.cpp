@@ -333,7 +333,8 @@ void GameplayScene::Play()
     // use_card_func
     //
     auto* discardDeckRef = &discardDeck;
-    auto use_card_func = [discardDeckRef](std::vector<Card>& container, int cardIndex)
+    auto* playerUsedCardRef = &playerUsedCard;
+    auto use_card_func = [discardDeckRef, playerUsedCardRef](std::vector<Card>& container, int cardIndex)
     {
         auto& card = container[cardIndex];
         // can use if has same color]
@@ -347,6 +348,8 @@ void GameplayScene::Play()
             // remove from play deck1
             //
             container.erase(container.begin() + cardIndex);
+
+            *playerUsedCardRef = true;
         }
     };
 
@@ -408,6 +411,49 @@ void GameplayScene::Play()
         matchUI.ReadOptionAndExecute();
 
         lastOptionIndex = matchUI.currentSelectedIndex;
+
+
+        if (playerUsedCard) {
+
+            playerUsedCard = false;
+            // AI duelist turns
+            //
+            for (size_t duelist_index = 0; duelist_index < duelists.size(); duelist_index++)
+            {
+                // Give total (duelistInitialHandSize) cards 
+                //  for each duelist, from shuffled matchDeck
+                //
+                auto& deck = duelists[duelist_index]->hand->deck;
+
+                // can use if has same color]
+                //
+                for (size_t card_index = 0; card_index < deck.size(); card_index++)
+                {
+                    if (deck[card_index].colorID == discardDeckRef->back().colorID) {
+
+                        // add to discardDeck
+                        //
+                        discardDeckRef->push_back(deck[card_index]);
+
+                        // remove from play deck1
+                        //
+                        deck.erase(deck.begin() + card_index);
+                        break;
+                    }
+                    //duelists[duelist_index]->hand->deck.push_back(MoveCardFromMatchDeck());
+                }
+            }
+            /*for (size_t i = 0; i < player_deck.size(); i++)
+            {
+                auto& card = player_deck[i];
+                matchUI.AddUserOptions({
+                       std::make_shared<UserOptionData>(
+                       card.ColoredDescription(),
+                       SIMPLE_FUNC_REF(use_card_func, player_deck, i))
+                    });
+            }*/
+        }
+
 
         // Duelists names
         //

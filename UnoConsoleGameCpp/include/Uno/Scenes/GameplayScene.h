@@ -121,6 +121,7 @@ private:
     int discardColorID;
     int duelistInitialHandSize = 7;
     bool endSetPlayers = false;
+    bool playerUsedCard = false;
     std::vector<std::shared_ptr<Duelist>> duelists;
     std::vector<Card> drawDeck = ShuffleDeck(CreateMatchDeck());
 
