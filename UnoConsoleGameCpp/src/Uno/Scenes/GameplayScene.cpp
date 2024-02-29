@@ -182,11 +182,12 @@ void DrawDuelist(const Duelist& duelist, int x, int y, std::vector<std::string>&
 }
 
 // Function to print the top card of the discard deck.
-void printTopCard(int centerX, int centerY, std::vector<std::string>& asciiTable) {
+void GameplayScene::PrintTopCard(int centerX, int centerY, std::vector<std::string>& asciiTable) {
+    int var = 1;
     std::vector<std::string> topCard = {
         " ----- ",
         "|     |",
-        "|Card |",
+        "| " + discardDeck.back().ColoredDescription() + " |",
         "|     |",
         " ----- "
     };
@@ -197,7 +198,7 @@ void printTopCard(int centerX, int centerY, std::vector<std::string>& asciiTable
     int startY = centerY - cardHeight / 2;
 
     for (int i = 0; i < cardHeight; ++i) {
-        for (int j = 0; j < cardWidth; ++j) {
+        for (int j = 0; j < topCard[i].size(); ++j) {
             if ((startY + i) >= 0 && (startY + i) < asciiTable.size() &&
                 (startX + j) >= 0 && (startX + j) < asciiTable[0].size()) {
                 asciiTable[startY + i][startX + j] = topCard[i][j];
@@ -265,7 +266,7 @@ void GameplayScene::DrawTable(UserInterface* ui) {
             DrawDuelist(*duelists[i], x, y, asciiTable);
         }
 
-        printTopCard(centerX, centerY, asciiTable);
+        PrintTopCard(centerX, centerY, asciiTable);
 
         // Determine the first and last rows with content
         int firstRowWithContent = asciiTable.size(), lastRowWithContent = 0;
@@ -294,8 +295,17 @@ void GameplayScene::DrawTable(UserInterface* ui) {
 
 
 
-
-
+Card GameplayScene::MoveCardFromMatchDeck() {
+    Card card = std::move(drawDeck.back()); // Move the top card into 'card'
+    drawDeck.pop_back(); // This is now safe; 'card' is no longer tied to the 'matchDeck'
+    return card; // Return the moved card
+}
+//Card&& GameplayScene::MoveCardFromMatchDeck() {
+//
+//    auto& card = matchDeck.back();
+//    matchDeck.pop_back();
+//    return std::move(card);
+//}
 
 void GameplayScene::Play()
 {
@@ -319,11 +329,11 @@ void GameplayScene::Play()
         //
         for (size_t card_count = 0; card_count < duelistInitialHandSize; card_count++)
         {
-            Card& topCard = matchDeck.back();
-            duelists[duelist_index]->hand->deck.push_back(topCard);
-            matchDeck.pop_back();
+            duelists[duelist_index]->hand->deck.push_back(MoveCardFromMatchDeck());
         }
     }
+
+    discardDeck.push_back(MoveCardFromMatchDeck());
 
     // Print MatchDeck
     //

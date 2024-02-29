@@ -112,12 +112,17 @@ public:
     }
 
 private:
+    Card MoveCardFromMatchDeck();
+    void PrintTopCard(int centerX, int centerY, std::vector<std::string>& asciiTable);
     int maxDuelists = 12;
     int minDuelists = 2;
+    //Card discardPileTopCard;
+    int discardColorID;
     int duelistInitialHandSize = 7;
     bool endSetPlayers = false;
     std::vector<std::shared_ptr<Duelist>> duelists;
-    std::vector<Card> matchDeck = ShuffleDeck(CreateMatchDeck());
+    std::vector<Card> drawDeck = ShuffleDeck(CreateMatchDeck());
+    std::vector<Card> discardDeck;
 
     std::vector<Card>& ShuffleDeck(std::vector<Card>& deck) {
         // Create a random number generator
