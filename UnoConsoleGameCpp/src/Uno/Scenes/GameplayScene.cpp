@@ -208,12 +208,15 @@ void GameplayScene::DrawDuelist(const Duelist& duelist, int colIndex, int rowInd
     // Print the player's label at the calculated position
     asciiTable[rowIndex].replace(labelStartX + zeroWidthCharCount, playerLabelSize, playerLabel);
 
+    if (highlight) {
+
+    }
+
     // Get the player's hand and print it as '*' characters
     std::string handString = duelist.hand->PrintHand();
     int handStringSize = handString.length();
-    if (highlight) {
+    if (highlight)
         handString = yellowForeground + handString + resetStyle;
-    }
 
     // Calculate the starting position for the player's hand
     int handStartX = colIndex - handStringSize / 2;
@@ -233,7 +236,19 @@ void GameplayScene::DrawDuelist(const Duelist& duelist, int colIndex, int rowInd
     // Print the player's hand at the calculated position
     asciiTable[rowIndex + 1].replace(handStartX + zeroWidthCharCount, handStringSize, handString);
 
-
+    if (highlight) {
+        //// ZeroWidthChar
+        //
+        // label
+        //
+        int colIndex = labelStartX + zeroWidthCharCount + playerLabelSize;
+        zeroWidthCharactersByRow.push_back(ZeroWidthCharInfo{ rowIndex, colIndex, 9 });
+        //
+        // handString
+        //
+        colIndex = handStartX + zeroWidthCharCount + handStringSize;
+        zeroWidthCharactersByRow.push_back(ZeroWidthCharInfo{ rowIndex + 1, colIndex, 9 });
+    }
 }
 
 // Function to print the top card of the discard deck.
@@ -274,13 +289,13 @@ void GameplayScene::PrintTopCard(int centerX, int centerY, std::vector<std::stri
         auto cardRow = cardDrawTable[cardRowIndex];
         //int lineWidth = cardRow.length();
 
+        // ZeroWidthChar
+        //
         bool beginZeroWidthCharCount = false;
         int zeroWidthCharCount = 0;
 
         auto totalCardCols = cardRow.size();
-
         int rowIndex = startY + cardRowIndex;
-
         for (int cardColIndex = 0; cardColIndex < totalCardCols; cardColIndex++) {
 
             int tableRowCount = screenBuffer.size();
@@ -293,49 +308,21 @@ void GameplayScene::PrintTopCard(int centerX, int centerY, std::vector<std::stri
 
                 screenBuffer[rowIndex][startX + cardColIndex] = cardChar;
 
-                if (cardChar == '\x1b') {
-
+                // ZeroWidthChar
+                //
+                if (cardChar == '\x1b')
                     beginZeroWidthCharCount = true;
-
-
-                    /*
-                    if (moveRightCount > 0)
-                        moveRight = true;
-                    moveRightCount = 1;
-
-                    while (true) {
-                        cardColIndex++;
-                        moveRightCount += 1;
-                        cardChar = cardRow[cardColIndex];
-                        screenBuffer[startY + cardRowIndex][startX + cardColIndex] = cardChar;
-                        if (cardChar == 'm') {
-                            break;
-                        }
-                    }*/
-                    
-                }
-
                 if (beginZeroWidthCharCount)
                     zeroWidthCharCount += 1;
-
-                if (cardChar == 'm') {
+                if (cardChar == 'm')
                     beginZeroWidthCharCount = false;
-                }
-
-                /*if (moveRight) {
-                    moveRightCountDrawTable += moveRightCount;
-                    moveRightCount = 0;
-                    moveRight = false;
-                }*/
             }
         }
 
-        //                                       startIndex  
+        // ZeroWidthChar
+        //
         int colIndex = startX + totalCardCols;
         zeroWidthCharactersByRow.push_back(ZeroWidthCharInfo{ rowIndex, colIndex, zeroWidthCharCount });
-        //zeroWidthCharactersByRow[cardRowIndex].first = startX + totalCardCols;
-        //// zeroCharCount
-        //zeroWidthCharactersByRow[cardRowIndex].second = zeroWidthCharCount;
     }
 }
 

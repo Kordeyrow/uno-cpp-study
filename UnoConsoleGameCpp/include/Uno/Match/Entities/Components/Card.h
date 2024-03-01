@@ -34,10 +34,10 @@ public:
 		: typeID{ typeID }, colorID{ color }, number{ number }
 	{
 		if (typeID == NUMBERED) {
-			description = std::to_string(number) + " ";
+			description = std::to_string(number);
 		}
 		else if (typeID == DRAW_2) {
-			description = "Draw +2";
+			description = "+2";
 		}
 		else if (typeID == REVERSE) {
 			description = "Reverse";
@@ -46,7 +46,7 @@ public:
 			description = "Skip";
 		}
 		else if (typeID == WILD_DRAW_4) {
-			description = "Wild Draw +4 aaaaa";
+			description = "Wild +4";
 		}
 	}
 
