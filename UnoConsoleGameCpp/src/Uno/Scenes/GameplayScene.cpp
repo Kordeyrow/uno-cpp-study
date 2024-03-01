@@ -25,7 +25,8 @@
 
 
 //#define FuncRef(func) std::bind(&decltype(*this)::func, this)
-#define MEMBER_FUNC_REF(func) std::bind(&std::remove_reference<decltype(*this)>::type::func, this)
+//#define MEMBER_FUNC_REF(func) std::bind(&std::remove_reference<decltype(*this)>::type::func, this)
+#define MEMBER_FUNC_REF(func, ...) std::bind(&std::remove_reference<decltype(*this)>::type::func, this, __VA_ARGS__)
 
 #define ARROW_KEY (char)224
 
@@ -33,7 +34,12 @@
 GameplayScene::GameplayScene() 
 {
     duelists.emplace_back(std::make_shared<Duelist>("Player", duelistInitialHandSize));
-    duelists.emplace_back(std::make_shared<Duelist>("Duelist 1", duelistInitialHandSize));
+
+    for (size_t i = 0; i < minDuelists-1; i++)
+    {
+        duelists.emplace_back(std::make_shared<Duelist>("Duelist " + std::to_string(i), duelistInitialHandSize));
+    }
+    //minDuelists
 }
 
 auto GameplayScene::Init() -> void
@@ -55,7 +61,7 @@ auto GameplayScene::Init() -> void
 
         std::make_shared<UserOptionData>(
             "Play",
-            MEMBER_FUNC_REF(Play)),
+            MEMBER_FUNC_REF(PlayMatch)),
     });
 }
 
@@ -169,46 +175,7 @@ void GameplayScene::DecreaseTotalDuelists() {
 
 
 
-
-
-
-
-
-// Function to print a single duelist at a given position and their hand of cards.
-//void DrawDuelist(const Duelist& duelist, int x, int y, std::vector<std::string>& asciiTable) {
-//    int tableWidth = asciiTable[0].size();
-//    int tableHeight = asciiTable.size();
-//
-//    // Generate the player's label with their name
-//    std::string playerLabel = "[" + duelist.name + "]";
-//
-//    // Calculate the starting position for the player's label
-//    int labelStartX = x - playerLabel.length() / 2;
-//
-//    // Make sure the label is within the bounds of the table
-//    if (labelStartX < 0) labelStartX = 0;
-//    if (labelStartX >= tableWidth - playerLabel.length()) labelStartX = tableWidth - playerLabel.length() - 1;
-//
-//    // Print the player's label at the calculated position
-//    asciiTable[y].replace(labelStartX, playerLabel.length(), playerLabel);
-//
-//    // Get the player's hand and print it as '*' characters
-//    std::string handString = duelist.hand->PrintHand();
-//
-//    // Calculate the starting position for the player's hand
-//    int handStartX = x - handString.length() / 2;
-//
-//    // Make sure the hand is within the bounds of the table
-//    if (handStartX < 0) handStartX = 0;
-//    if (handStartX >= tableWidth - handString.length()) handStartX = tableWidth - handString.length() - 1;
-//
-//    // Print the player's hand at the calculated position
-//    asciiTable[y + 1].replace(handStartX, handString.length(), handString);
-//}
-
-
-
-void DrawDuelist(const Duelist& duelist, int x, int y, std::vector<std::string>& asciiTable, bool highlight) {
+void GameplayScene::DrawDuelist(const Duelist& duelist, int colIndex, int rowIndex, std::vector<std::string>& asciiTable, bool highlight) {
     int tableWidth = asciiTable[0].size();
     int tableHeight = asciiTable.size();
 
@@ -224,14 +191,22 @@ void DrawDuelist(const Duelist& duelist, int x, int y, std::vector<std::string>&
     playerLabel = highlight ? yellowForeground + playerLabel + resetStyle : playerLabel;
 
     // Calculate the starting position for the player's label
-    int labelStartX = x - playerLabelSize / 2;
+    int labelStartX = colIndex - playerLabelSize / 2;
 
     // Make sure the label is within the bounds of the table
     if (labelStartX < 0) labelStartX = 0;
     if (labelStartX + playerLabelSize > tableWidth) labelStartX = tableWidth - playerLabelSize;
 
+    // count zeroWidthChars
+    int zeroWidthCharCount = 0;
+    for (auto& zeroWidthCharactersInRow : zeroWidthCharactersByRow) {
+        if (zeroWidthCharactersInRow.rowIndex == rowIndex && zeroWidthCharactersInRow.colIndex < colIndex) {
+            zeroWidthCharCount += zeroWidthCharactersInRow.count;
+        }
+    }
+
     // Print the player's label at the calculated position
-    asciiTable[y].replace(labelStartX, playerLabelSize, playerLabel);
+    asciiTable[rowIndex].replace(labelStartX + zeroWidthCharCount, playerLabelSize, playerLabel);
 
     // Get the player's hand and print it as '*' characters
     std::string handString = duelist.hand->PrintHand();
@@ -241,39 +216,126 @@ void DrawDuelist(const Duelist& duelist, int x, int y, std::vector<std::string>&
     }
 
     // Calculate the starting position for the player's hand
-    int handStartX = x - handStringSize / 2;
+    int handStartX = colIndex - handStringSize / 2;
 
     // Make sure the hand is within the bounds of the table
     if (handStartX < 0) handStartX = 0;
     if (handStartX + handStringSize > tableWidth) handStartX = tableWidth - handStringSize;
 
+
+    // count zeroWidthChars
+    zeroWidthCharCount = 0;
+    for (auto& zeroWidthCharactersInRow : zeroWidthCharactersByRow) {
+        if (zeroWidthCharactersInRow.rowIndex == (rowIndex + 1) && zeroWidthCharactersInRow.colIndex < colIndex) {
+            zeroWidthCharCount += zeroWidthCharactersInRow.count;
+        }
+    }
     // Print the player's hand at the calculated position
-    asciiTable[y + 1].replace(handStartX, handStringSize, handString);
+    asciiTable[rowIndex + 1].replace(handStartX + zeroWidthCharCount, handStringSize, handString);
+
+
 }
 
 // Function to print the top card of the discard deck.
-void GameplayScene::PrintTopCard(int centerX, int centerY, std::vector<std::string>& asciiTable) {
+void GameplayScene::PrintTopCard(int centerX, int centerY, std::vector<std::string>& screenBuffer) {
+
+    if (discardDeck.size() == 0) {
+        return;
+    }
+
     int var = 1;
-    std::vector<std::string> topCard = {
-        " ----- ",
-        "|     |",
-        "| " + discardDeck.back().ColoredDescription() + " |",
-        "|     |",
-        " ----- "
+    int descriptionSize = discardDeck.back().RawDescription().size();
+    int spaceCountLeft = (8 - descriptionSize) / 2;
+    if (spaceCountLeft < 0)
+        spaceCountLeft = 0;
+    int spaceCountRight = spaceCountLeft + ((8 - descriptionSize) % 2) ;
+    if (spaceCountRight < 0)
+        spaceCountRight = 0;
+
+    std::string spacesLeft = std::string(spaceCountLeft, ' ');
+    std::string spacesRight = std::string(spaceCountRight, ' ');
+
+    std::vector<std::string> cardDrawTable = {
+        " -------- ",
+        "|        |",
+        "|        |",
+        "|" + spacesLeft + discardDeck.back().ColoredDescription() + spacesRight + "|",
+        "|        |",
+        "|        |",
+        " -------- "
     };
 
-    int cardWidth = topCard[0].length(); // Width of the card representation
-    int cardHeight = topCard.size(); // Height of the card representation
-    int startX = centerX - cardWidth / 2;
-    int startY = centerY - cardHeight / 2;
+    int totalCardRows = cardDrawTable.size(); // Height of the card representation
+    int startY = centerY - totalCardRows / 2;
+    int startX = centerX - cardDrawTable[0].length() / 2;
 
-    for (int i = 0; i < cardHeight; ++i) {
-        for (int j = 0; j < topCard[i].size(); ++j) {
-            if ((startY + i) >= 0 && (startY + i) < asciiTable.size() &&
-                (startX + j) >= 0 && (startX + j) < asciiTable[0].size()) {
-                asciiTable[startY + i][startX + j] = topCard[i][j];
+    for (int cardRowIndex = 0; cardRowIndex < totalCardRows; cardRowIndex++) {
+
+        auto cardRow = cardDrawTable[cardRowIndex];
+        //int lineWidth = cardRow.length();
+
+        bool beginZeroWidthCharCount = false;
+        int zeroWidthCharCount = 0;
+
+        auto totalCardCols = cardRow.size();
+
+        int rowIndex = startY + cardRowIndex;
+
+        for (int cardColIndex = 0; cardColIndex < totalCardCols; cardColIndex++) {
+
+            int tableRowCount = screenBuffer.size();
+            int tableColCount = screenBuffer[0].size();
+
+            if ((rowIndex) >= 0 && (rowIndex) < tableRowCount &&
+                (startX + cardColIndex) >= 0 && (startX + cardColIndex) < tableColCount) {
+
+                auto& cardChar = cardRow[cardColIndex];
+
+                screenBuffer[rowIndex][startX + cardColIndex] = cardChar;
+
+                if (cardChar == '\x1b') {
+
+                    beginZeroWidthCharCount = true;
+
+
+                    /*
+                    if (moveRightCount > 0)
+                        moveRight = true;
+                    moveRightCount = 1;
+
+                    while (true) {
+                        cardColIndex++;
+                        moveRightCount += 1;
+                        cardChar = cardRow[cardColIndex];
+                        screenBuffer[startY + cardRowIndex][startX + cardColIndex] = cardChar;
+                        if (cardChar == 'm') {
+                            break;
+                        }
+                    }*/
+                    
+                }
+
+                if (beginZeroWidthCharCount)
+                    zeroWidthCharCount += 1;
+
+                if (cardChar == 'm') {
+                    beginZeroWidthCharCount = false;
+                }
+
+                /*if (moveRight) {
+                    moveRightCountDrawTable += moveRightCount;
+                    moveRightCount = 0;
+                    moveRight = false;
+                }*/
             }
         }
+
+        //                                       startIndex  
+        int colIndex = startX + totalCardCols;
+        zeroWidthCharactersByRow.push_back(ZeroWidthCharInfo{ rowIndex, colIndex, zeroWidthCharCount });
+        //zeroWidthCharactersByRow[cardRowIndex].first = startX + totalCardCols;
+        //// zeroCharCount
+        //zeroWidthCharactersByRow[cardRowIndex].second = zeroWidthCharCount;
     }
 }
 
@@ -310,9 +372,10 @@ void GameplayScene::DrawTable(UserInterface* ui, int duelist_index) {
         //    continue;
         //}
 
-        const int tableWidth = 80;
+        const int tableWidth = 86;
         const int tableHeight = 32;
-        std::vector<std::string> asciiTable(tableHeight, std::string(tableWidth, ' '));
+        std::vector<std::string> screenBuffer(tableHeight, std::string(tableWidth, ' '));
+        zeroWidthCharactersByRow.clear();
 
         int centerX = tableWidth / 2;
         int centerY = tableHeight / 2;
@@ -325,6 +388,8 @@ void GameplayScene::DrawTable(UserInterface* ui, int duelist_index) {
         int radiusX = static_cast<int>((centerX - 10) * radiusScaleFactor);
         int radiusY = static_cast<int>((centerY - 5) * radiusScaleFactor * 2);
 
+        PrintTopCard(centerX, centerY, screenBuffer);
+
         for (int i = 0; i < totalPlayers; ++i) {
             double angle = startAngle - (2 * M_PI * i / totalPlayers);
             if (angle < 0) angle += 2 * M_PI;
@@ -333,15 +398,13 @@ void GameplayScene::DrawTable(UserInterface* ui, int duelist_index) {
             int y = static_cast<int>(centerY - (radiusY * sin(angle) / 2));
 
             //Duelist player("Player " + std::to_string(i + 1), 7);
-            DrawDuelist(*duelists[i], x, y, asciiTable, i == duelist_index);
+            DrawDuelist(*duelists[i], x, y, screenBuffer, i == duelist_index);
         }
 
-        PrintTopCard(centerX, centerY, asciiTable);
-
         // Determine the first and last rows with content
-        int firstRowWithContent = asciiTable.size(), lastRowWithContent = 0;
-        for (int i = 0; i < asciiTable.size(); ++i) {
-            if (!IsStringEmpty(asciiTable[i])) {
+        int firstRowWithContent = screenBuffer.size(), lastRowWithContent = 0;
+        for (int i = 0; i < screenBuffer.size(); ++i) {
+            if (!IsStringEmpty(screenBuffer[i])) {
                 firstRowWithContent = std::min(firstRowWithContent, i);
                 lastRowWithContent = i;
             }
@@ -352,7 +415,7 @@ void GameplayScene::DrawTable(UserInterface* ui, int duelist_index) {
         std::stringstream screenData;
         screenData << std::endl;
         for (int i = firstRowWithContent; i <= lastRowWithContent; ++i) {
-            screenData << asciiTable[i] << std::endl;
+            screenData << screenBuffer[i] << std::endl;
         }
         screenData << std::endl;
         //DrawLine();
@@ -362,22 +425,18 @@ void GameplayScene::DrawTable(UserInterface* ui, int duelist_index) {
 }
 
 
-
-
-
-Card GameplayScene::MoveCardFromMatchDeck() {
+void GameplayScene::DrawCard(std::vector<Card>& target) {
+    if (drawDeck.size() == 0) {
+        return;
+    }
     Card card = std::move(drawDeck.back()); // Move the top card into 'card'
     drawDeck.pop_back(); // This is now safe; 'card' is no longer tied to the 'matchDeck'
-    return card; // Return the moved card
+    target.push_back(card);
 }
-//Card&& GameplayScene::MoveCardFromMatchDeck() {
-//
-//    auto& card = matchDeck.back();
-//    matchDeck.pop_back();
-//    return std::move(card);
-//}
 
-void GameplayScene::Play()
+
+
+void GameplayScene::PlayMatch()
 {
     // MatchUI
     //
@@ -415,11 +474,11 @@ void GameplayScene::Play()
         //
         for (size_t card_count = 0; card_count < duelistInitialHandSize; card_count++)
         {
-            duelists[duelist_index]->hand->deck.push_back(MoveCardFromMatchDeck());
+            DrawCard(duelists[duelist_index]->hand->deck);
         }
     }
 
-    discardDeck.push_back(MoveCardFromMatchDeck());
+    DrawCard(discardDeck);
 
     // Print MatchDeck
     //
@@ -448,6 +507,11 @@ void GameplayScene::Play()
                    SIMPLE_FUNC_REF(use_card_func, player_deck, i))
                 });
         }
+        matchUI.AddUserOptions({
+               std::make_shared<UserOptionData>(
+               "Draw Card",
+               MEMBER_FUNC_REF(DrawCard, player_deck))
+            });
 
         // As options reset, selection was lost
         //
@@ -464,7 +528,7 @@ void GameplayScene::Play()
                 // delay
                 //
                 DrawTable(&matchUI, duelist_index);
-                std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+                std::this_thread::sleep_for(std::chrono::milliseconds(1300));
 
                 // Give total (duelistInitialHandSize) cards 
                 //  for each duelist, from shuffled matchDeck

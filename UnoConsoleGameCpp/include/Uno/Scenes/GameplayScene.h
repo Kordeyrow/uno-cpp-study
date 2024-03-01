@@ -6,6 +6,12 @@
 #include <conio.h>
 #include <algorithm> // For std::shuffle
 
+struct ZeroWidthCharInfo {
+    int rowIndex;
+    int colIndex;
+    int count;
+};
+
 class GameplayScene : public BaseScene {
 public:
     GameplayScene();
@@ -21,7 +27,7 @@ public:
 
     // ==========  Play  ========== //
     //
-    void Play();
+    void PlayMatch();
     void DrawTable(UserInterface* ui, int duelist_index);
 
     std::vector<Card>& CreateMatchDeck() {
@@ -113,15 +119,22 @@ public:
     std::vector<Card> discardDeck;
 
 private:
-    Card MoveCardFromMatchDeck();
+    void DrawCard(std::vector<Card>& target);
+    void DrawDuelist(const Duelist& duelist, int x, int y, std::vector<std::string>& asciiTable, bool highlight);
     void PrintTopCard(int centerX, int centerY, std::vector<std::string>& asciiTable);
     int maxDuelists = 12;
-    int minDuelists = 2;
+    int minDuelists = 12;
     //Card discardPileTopCard;
     int discardColorID;
     int duelistInitialHandSize = 7;
     bool endSetPlayers = false;
     bool playerUsedCard = false;
+    
+    // Save how many zeroWidthCharacters exist in a line, marking each index
+    // so that next draws knows how to move right correctly to draw in intended screen pos(pixel)
+    std::vector<ZeroWidthCharInfo> zeroWidthCharactersByRow;
+    
+    //int moveRightCountDrawTable = 0;
     std::vector<std::shared_ptr<Duelist>> duelists;
     std::vector<Card> drawDeck = ShuffleDeck(CreateMatchDeck());
 

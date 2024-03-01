@@ -34,7 +34,7 @@ public:
 		: typeID{ typeID }, colorID{ color }, number{ number }
 	{
 		if (typeID == NUMBERED) {
-			description = std::to_string(number);
+			description = std::to_string(number) + " ";
 		}
 		else if (typeID == DRAW_2) {
 			description = "Draw +2";
@@ -46,13 +46,15 @@ public:
 			description = "Skip";
 		}
 		else if (typeID == WILD_DRAW_4) {
-			description = "Wild Draw +4";
+			description = "Wild Draw +4 aaaaa";
 		}
 	}
 
 	constexpr static int colors[4] = { RED, GREEN, YELLOW, BLUE };
 
+	std::string RawDescription() { return " " + description + " "; }
 	std::string ColoredDescription() { return startColor + " " + description + " " + resetColor; }
+	//std::string ColoredDescriptionFixed() { return startColor + " " + description + " " + resetColor; }
 	std::string startColor = "\x1b[1;" + std::to_string(colorID + 10) + "m"; // +10 because background ranges grom 40 to 49 / foreground 30 to 39
 	std::string resetColor = "\x1b[0m";
 
