@@ -11,7 +11,18 @@
 //#define SIMPLE_FUNC_REF(callable, ...) [&]() mutable { callable(__VA_ARGS__); }
 //#define SIMPLE_FUNC_REF(callable, ...) [&, __VA_ARGS__]() mutable { callable(__VA_ARGS__); }
 
-#define SIMPLE_FUNC_REF(callable, ref, val) [&, val]() mutable { callable(ref, val); }
+
+
+#define SIMPLE_FUNC_REF(callable, ref, val, val2) [&, val]() mutable { callable(ref, val, val2); }
+
+//#define SIMPLE_FUNC_REF(callable, ref, ...)) [&, __VA_ARGS__]() mutable { callable(ref, __VA_ARGS__); }
+//#define SIMPLE_FUNC_REF(callable, ref, ...) [&ref, &](){ callable(ref, __VA_ARGS__); }
+//#define SIMPLE_FUNC_REF(callable, ref, ...) [&ref, &]() mutable { callable(ref, __VA_ARGS__); }
+
+//#define SIMPLE_FUNC_REF(callable, ref, ...) [&ref, &]() mutable { callable(ref, __VA_ARGS__); }
+//#define SIMPLE_FUNC_REF(callable, ref, ...) [&ref, &]() mutable { callable(ref, __VA_ARGS__); }
+//#define SIMPLE_FUNC_REF(callable, ref, ...) [&ref, &]() mutable { callable(ref, __VA_ARGS__); }
+
 
 
 // working
@@ -22,11 +33,11 @@
 
 
 
-
-
 //#define FuncRef(func) std::bind(&decltype(*this)::func, this)
 //#define MEMBER_FUNC_REF(func) std::bind(&std::remove_reference<decltype(*this)>::type::func, this)
 #define MEMBER_FUNC_REF(func, ...) std::bind(&std::remove_reference<decltype(*this)>::type::func, this, __VA_ARGS__)
+//#define MEMBER_FUNC_REF(func, ...) std::bind(&std::remove_reference<decltype(*this)>::type::func, this, std::ref(__VA_ARGS__)...)
+
 
 #define ARROW_KEY (char)224
 
@@ -35,7 +46,7 @@ GameplayScene::GameplayScene()
 {
     duelists.emplace_back(std::make_shared<Duelist>("Player", duelistInitialHandSize));
 
-    for (size_t i = 0; i < minDuelists-1; i++)
+    for (size_t i = 0; i < startDuelists -1; i++)
     {
         duelists.emplace_back(std::make_shared<Duelist>("Duelist " + std::to_string(i), duelistInitialHandSize));
     }
@@ -408,6 +419,20 @@ void GameplayScene::DrawCard(std::vector<Card>& target) {
     target.push_back(card);
 }
 
+void GameplayScene::PlayerOptionDrawCard() {
+
+    if (cardsToBuy_2 > 0) {
+        for (size_t i = 0; i < cardsToBuy_2; i++) {
+            DrawCard(duelists[0]->hand->deck);
+        }
+        cardsToBuy_2 = 0;
+    }
+    else {
+        DrawCard(duelists[0]->hand->deck);
+    }
+
+    playerTurnActionDone = true;
+}
 
 
 void GameplayScene::PlayMatch()
@@ -421,13 +446,14 @@ void GameplayScene::PlayMatch()
     //                                     
     //                                     
     auto* discardDeckRef = &discardDeck;
-    auto* playerUsedCardRef = &playerUsedCard;
     auto* cardsToBuy_2Ref = &cardsToBuy_2;
     auto* skipRef = &skip;
+    auto* duelistUsedCardRef = &duelistTurnActionDone;
+    auto* playerUsedCardRef = &playerTurnActionDone;
 
     auto use_card_func = 
-        [discardDeckRef, playerUsedCardRef, cardsToBuy_2Ref, skipRef]
-        (std::vector<Card>& container, int cardIndex)
+        [discardDeckRef, duelistUsedCardRef, cardsToBuy_2Ref, skipRef, playerUsedCardRef]
+        (std::vector<Card>& container, int cardIndex, bool isPlayer)
     {
         if (discardDeckRef->size() == 0)
             return;
@@ -466,7 +492,9 @@ void GameplayScene::PlayMatch()
             //
             container.erase(container.begin() + cardIndex);
 
-            *playerUsedCardRef = true;
+            *duelistUsedCardRef = true;
+            if (isPlayer)
+                *playerUsedCardRef = true;
         }
     };
 
@@ -510,14 +538,17 @@ void GameplayScene::PlayMatch()
             auto& card = player_deck[i];
             matchUI.AddUserOptions({
                    std::make_shared<UserOptionData>(
-                   card.ColoredDescription(),
-                   SIMPLE_FUNC_REF(use_card_func, player_deck, i))
+                       card.ColoredDescription(),
+                       SIMPLE_FUNC_REF(use_card_func, player_deck, i, true)
+                   )
                 });
         }
+
         matchUI.AddUserOptions({
                std::make_shared<UserOptionData>(
-               "Draw Card",
-               MEMBER_FUNC_REF(DrawCard, player_deck))
+                   "Draw Card",
+                   MEMBER_FUNC_REF(PlayerOptionDrawCard)
+               )
             });
 
         // As options reset, selection was lost
@@ -525,9 +556,10 @@ void GameplayScene::PlayMatch()
         matchUI.currentSelectedIndex = lastOptionIndex;
         matchUI.ShowOptions();
 
-        if (playerUsedCard) {
+        if (playerTurnActionDone) {
 
-            playerUsedCard = false;
+            playerTurnActionDone = false;
+            duelistTurnActionDone = false;
             // AI duelist turns
             //
             for (size_t duelist_index = 1; duelist_index < duelists.size(); duelist_index++)
@@ -535,12 +567,12 @@ void GameplayScene::PlayMatch()
                 // delay
                 //
                 DrawTable(&matchUI, duelist_index);
-                std::this_thread::sleep_for(std::chrono::milliseconds(1300));
 
                 if (skip) {
                     skip = false;
                     continue;
                 }
+                std::this_thread::sleep_for(std::chrono::milliseconds(2500));
 
                 // Give total (duelistInitialHandSize) cards 
                 //  for each duelist, from shuffled matchDeck
@@ -548,23 +580,30 @@ void GameplayScene::PlayMatch()
                 auto& deck = duelists[duelist_index]->hand->deck;
 
                 // can use if has same color]
-                //
+                //                
                 for (size_t card_index = 0; card_index < deck.size(); card_index++)
                 {
-                    if (deck[card_index].colorID == discardDeckRef->back().colorID) {
+                    use_card_func(deck, card_index, false);
 
-                        // add to discardDeck
-                        //
-                        discardDeckRef->push_back(deck[card_index]);
-
-                        // remove from play deck1
-                        //
-                        deck.erase(deck.begin() + card_index);
+                    if (duelistTurnActionDone) {
                         break;
                     }
-                    //duelists[duelist_index]->hand->deck.push_back(MoveCardFromMatchDeck());
                 }
 
+                if (duelistTurnActionDone) {
+                    duelistTurnActionDone = false;
+                }
+                else {
+                    if (cardsToBuy_2 > 0) {
+                        for (size_t i = 0; i < cardsToBuy_2; i++){
+                            DrawCard(duelists[duelist_index]->hand->deck);
+                        }
+                        cardsToBuy_2 = 0;
+                    }
+                    else {
+                        DrawCard(duelists[duelist_index]->hand->deck);
+                    }
+                }
             }
             /*for (size_t i = 0; i < player_deck.size(); i++)
             {
@@ -583,6 +622,7 @@ void GameplayScene::PlayMatch()
         //
         if (skip) {
             skip = false;
+            playerTurnActionDone = true;
         }
         else {
             matchUI.ReadOptionAndExecute();

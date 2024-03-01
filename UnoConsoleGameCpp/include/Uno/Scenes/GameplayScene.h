@@ -120,15 +120,19 @@ public:
 
 private:
     void DrawCard(std::vector<Card>& target);
+    void PlayerOptionDrawCard();
     void DrawDuelist(const Duelist& duelist, int x, int y, std::vector<std::string>& asciiTable, bool highlight);
     void PrintTopCard(int centerX, int centerY, std::vector<std::string>& asciiTable);
     int maxDuelists = 12;
     int minDuelists = 2;
+    int startDuelists = 4;
     //Card discardPileTopCard;
     int discardColorID;
     int duelistInitialHandSize = 7;
     bool endSetPlayers = false;
-    bool playerUsedCard = false;
+
+    bool playerTurnActionDone = false;
+    bool duelistTurnActionDone = false;
 
     // Effects
     int cardsToBuy_2 = 0;
