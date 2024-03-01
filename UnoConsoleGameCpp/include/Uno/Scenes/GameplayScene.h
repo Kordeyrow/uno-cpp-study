@@ -129,6 +129,11 @@ private:
     int duelistInitialHandSize = 7;
     bool endSetPlayers = false;
     bool playerUsedCard = false;
+
+    // Effects
+    int cardsToBuy_2 = 0;
+    int cardsToBuy_4 = 0;
+    bool skip = false;
     
     // Save how many zeroWidthCharacters exist in a line, marking each index
     // so that next draws knows how to move right correctly to draw in intended screen pos(pixel)

@@ -422,7 +422,12 @@ void GameplayScene::PlayMatch()
     //                                     
     auto* discardDeckRef = &discardDeck;
     auto* playerUsedCardRef = &playerUsedCard;
-    auto use_card_func = [discardDeckRef, playerUsedCardRef](std::vector<Card>& container, int cardIndex)
+    auto* cardsToBuy_2Ref = &cardsToBuy_2;
+    auto* skipRef = &skip;
+
+    auto use_card_func = 
+        [discardDeckRef, playerUsedCardRef, cardsToBuy_2Ref, skipRef]
+        (std::vector<Card>& container, int cardIndex)
     {
         if (discardDeckRef->size() == 0)
             return;
@@ -430,10 +435,29 @@ void GameplayScene::PlayMatch()
         // can use if has same color, or numbered card same number
         //
         auto& card = container[cardIndex];
-        if (card.colorID == discardDeckRef->back().colorID
-            || (card.typeID == Card::NUMBERED && card.number == discardDeckRef->back().number)
+
+        if (*cardsToBuy_2Ref > 0 && card.typeID != Card::DRAW_2) {
+            return;
+        }
+
+        if (card.typeID == Card::NUMBERED) {
+            if (card.number != discardDeckRef->back().number 
+                && card.colorID != discardDeckRef->back().colorID) {
+                return;
+            }
+        }
+
+        if ((card.colorID == discardDeckRef->back().colorID)
             || (card.typeID == discardDeckRef->back().typeID)) {
             
+            if (card.typeID == Card::SKIP) {
+                *skipRef = true;
+            }
+
+            if (card.typeID == Card::DRAW_2) {
+                *cardsToBuy_2Ref += 2;
+            }
+
             // add to discardDeck
             //
             discardDeckRef->push_back(card);
@@ -513,6 +537,11 @@ void GameplayScene::PlayMatch()
                 DrawTable(&matchUI, duelist_index);
                 std::this_thread::sleep_for(std::chrono::milliseconds(1300));
 
+                if (skip) {
+                    skip = false;
+                    continue;
+                }
+
                 // Give total (duelistInitialHandSize) cards 
                 //  for each duelist, from shuffled matchDeck
                 //
@@ -552,8 +581,13 @@ void GameplayScene::PlayMatch()
 
         // Player Action
         //
-        matchUI.ReadOptionAndExecute();
-        lastOptionIndex = matchUI.currentSelectedIndex;
+        if (skip) {
+            skip = false;
+        }
+        else {
+            matchUI.ReadOptionAndExecute();
+            lastOptionIndex = matchUI.currentSelectedIndex;
+        }
 
         
 
