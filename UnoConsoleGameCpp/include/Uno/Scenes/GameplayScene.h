@@ -28,7 +28,7 @@ public:
     // ==========  Play  ========== //
     //
     void PlayMatch();
-    void DrawTable(UserInterface* ui, int duelist_index);
+    void DrawTable(UserInterface* ui, int duelist_index, bool winner);
 
     std::vector<Card>& CreateMatchDeck() {
 
@@ -119,16 +119,18 @@ public:
     std::vector<Card> discardDeck;
 
 private:
+
+    int maxDuelists = 12;
+    int minDuelists = 2;
+    int startDuelists = 4;
+    int duelistInitialHandSize = 7;
+    int turnActionDelay = 2200;
+
     void DrawCard(std::vector<Card>& target);
     void PlayerOptionDrawCard();
     void DrawDuelist(const Duelist& duelist, int x, int y, std::vector<std::string>& asciiTable, bool highlight);
     void PrintTopCard(int centerX, int centerY, std::vector<std::string>& asciiTable);
-    int maxDuelists = 12;
-    int minDuelists = 2;
-    int startDuelists = 4;
     //Card discardPileTopCard;
-    int discardColorID;
-    int duelistInitialHandSize = 7;
     bool endSetPlayers = false;
     int dir = 1;
 
@@ -139,6 +141,9 @@ private:
     int cardsToBuy_2 = 0;
     int cardsToBuy_4 = 0;
     bool skip = false;
+
+    std::shared_ptr<Duelist> winner;
+    int winnerIndex;
     
     // Save how many zeroWidthCharacters exist in a line, marking each index
     // so that next draws knows how to move right correctly to draw in intended screen pos(pixel)

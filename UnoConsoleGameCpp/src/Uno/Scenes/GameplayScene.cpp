@@ -13,7 +13,7 @@
 
 
 
-#define SIMPLE_FUNC_REF(callable, ref, val, val2) [&, val]() mutable { callable(ref, val, val2); }
+#define SIMPLE_FUNC_REF(callable, ref, ref2, val, val2) [&, val]() mutable { callable(ref, ref2, val, val2); }
 
 //#define SIMPLE_FUNC_REF(callable, ref, ...)) [&, __VA_ARGS__]() mutable { callable(ref, __VA_ARGS__); }
 //#define SIMPLE_FUNC_REF(callable, ref, ...) [&ref, &](){ callable(ref, __VA_ARGS__); }
@@ -67,7 +67,7 @@ auto GameplayScene::Init() -> void
             std::bind(&GameplayScene::DecreaseTotalDuelists, this)),
 
         std::make_shared<UserOptionData>(
-            "Set players names",
+            "Set duelists names",
             std::bind(&GameplayScene::SetPlayersNames, this)),
 
         std::make_shared<UserOptionData>(
@@ -349,7 +349,7 @@ void DrawLine(int count) {
 
 
 
-void GameplayScene::DrawTable(UserInterface* ui, int duelist_index) {
+void GameplayScene::DrawTable(UserInterface* ui, int duelist_index, bool winner) {
     
     const int tableWidth = 86;
     const int tableHeight = 32;
@@ -437,6 +437,28 @@ void GameplayScene::PlayerOptionDrawCard() {
 
 void GameplayScene::PlayMatch()
 {
+    // Reset game
+    //
+    discardDeck = {};
+    cardsToBuy_2 = 0;
+    cardsToBuy_4 = 0;
+    skip = false;
+    //discardColorID;
+    endSetPlayers = false;
+    dir = 1;
+    playerTurnActionDone = false;
+    duelistTurnActionDone = false;
+    duelists = {};
+    duelists.emplace_back(std::make_shared<Duelist>("Player", duelistInitialHandSize));
+    for (size_t i = 0; i < startDuelists - 1; i++)
+    {
+        duelists.emplace_back(std::make_shared<Duelist>("Duelist " + std::to_string(i), duelistInitialHandSize));
+    }
+    drawDeck = ShuffleDeck(CreateMatchDeck());
+
+    // winner
+    winner = nullptr;
+
     // MatchUI
     //
     UserInterface matchUI = *userInterface; // Keep state (only change copy)
@@ -451,10 +473,11 @@ void GameplayScene::PlayMatch()
     auto* duelistUsedCardRef = &duelistTurnActionDone;
     auto* playerUsedCardRef = &playerTurnActionDone;
     auto* dirRef = &dir;
+    auto* winnerRef = &winner;
 
     auto use_card_func = 
-        [discardDeckRef, duelistUsedCardRef, cardsToBuy_2Ref, skipRef, playerUsedCardRef, dirRef]
-        (std::vector<Card>& container, int cardIndex, bool isPlayer)
+        [discardDeckRef, duelistUsedCardRef, cardsToBuy_2Ref, skipRef, playerUsedCardRef, dirRef, winnerRef]
+        (std::shared_ptr<Duelist> duelist, std::vector<Card>& container, int cardIndex, bool isPlayer)
     {
         if (discardDeckRef->size() == 0)
             return;
@@ -501,6 +524,10 @@ void GameplayScene::PlayMatch()
             if (isPlayer)
                 *playerUsedCardRef = true;
         }
+
+        if (container.size() == 0) {
+            *winnerRef = duelist;
+        }
     };
 
 
@@ -536,15 +563,15 @@ void GameplayScene::PlayMatch()
         // Options (player cards)
         //
         matchUI.ClearOptions();
-        auto& player = duelists[0];
-        auto& player_deck = player->hand->deck;
-        for (size_t i = 0; i < player_deck.size(); i++)
+        auto& duelist = duelists[0];
+        auto& duelist_deck = duelist->hand->deck;
+        for (size_t i = 0; i < duelist_deck.size(); i++)
         {
-            auto& card = player_deck[i];
+            auto& card = duelist_deck[i];
             matchUI.AddUserOptions({
                    std::make_shared<UserOptionData>(
                        card.ColoredDescription(),
-                       SIMPLE_FUNC_REF(use_card_func, player_deck, i, true)
+                       SIMPLE_FUNC_REF(use_card_func, duelist, duelist_deck, i, true)
                    )
                 });
         }
@@ -580,7 +607,7 @@ void GameplayScene::PlayMatch()
 
                 // delay
                 //
-                DrawTable(&matchUI, currentDuelistIndex);
+                DrawTable(&matchUI, currentDuelistIndex, false);
 
                 if (skip) {
                     skip = false;
@@ -589,7 +616,7 @@ void GameplayScene::PlayMatch()
                         currentDuelistIndex = 0;
                     continue;
                 }
-                std::this_thread::sleep_for(std::chrono::milliseconds(2500));
+                std::this_thread::sleep_for(std::chrono::milliseconds(turnActionDelay));
 
                 // Give total (duelistInitialHandSize) cards 
                 //  for each duelist, from shuffled matchDeck
@@ -600,11 +627,16 @@ void GameplayScene::PlayMatch()
                 //                
                 for (size_t card_index = 0; card_index < deck.size(); card_index++)
                 {
-                    use_card_func(deck, card_index, false);
+                    use_card_func(duelists[currentDuelistIndex], deck, card_index, false);
 
                     if (duelistTurnActionDone) {
                         break;
                     }
+                }
+
+                if (winner != nullptr) {
+                    winnerIndex = currentDuelistIndex;
+                    break;
                 }
 
                 if (duelistTurnActionDone) {
@@ -628,20 +660,30 @@ void GameplayScene::PlayMatch()
             }
         }
 
-        DrawTable(&matchUI, 0);
 
-        // Player Action
-        //
-        if (skip) {
-            skip = false;
-            playerTurnActionDone = true;
-        }
-        else {
-            matchUI.ReadOptionAndExecute();
-            lastOptionIndex = matchUI.currentSelectedIndex;
-        }
-
+        DrawTable(&matchUI, 0, false);
         
+        if (winner == nullptr) {
+            // Player Action
+            //
+            if (skip) {
+                skip = false;
+                playerTurnActionDone = true;
+            }
+            else {
+                matchUI.ReadOptionAndExecute();
+                lastOptionIndex = matchUI.currentSelectedIndex;
+            }
+            if (winner)
+                winnerIndex = 0;
+        }
+
+        if (winner != nullptr) {
+            matchUI.SetUserOptions({});
+            DrawTable(&matchUI, 0, true);
+            _getch();
+            break;
+        }
 
 
         // Duelists names
