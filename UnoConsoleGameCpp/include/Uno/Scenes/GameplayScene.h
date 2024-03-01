@@ -123,7 +123,7 @@ private:
     void DrawDuelist(const Duelist& duelist, int x, int y, std::vector<std::string>& asciiTable, bool highlight);
     void PrintTopCard(int centerX, int centerY, std::vector<std::string>& asciiTable);
     int maxDuelists = 12;
-    int minDuelists = 12;
+    int minDuelists = 2;
     //Card discardPileTopCard;
     int discardColorID;
     int duelistInitialHandSize = 7;

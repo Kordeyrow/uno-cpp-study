@@ -208,10 +208,6 @@ void GameplayScene::DrawDuelist(const Duelist& duelist, int colIndex, int rowInd
     // Print the player's label at the calculated position
     asciiTable[rowIndex].replace(labelStartX + zeroWidthCharCount, playerLabelSize, playerLabel);
 
-    if (highlight) {
-
-    }
-
     // Get the player's hand and print it as '*' characters
     std::string handString = duelist.hand->PrintHand();
     int handStringSize = handString.length();
@@ -342,80 +338,71 @@ void DrawLine(int count) {
 
 
 
-
-
-
-
 void GameplayScene::DrawTable(UserInterface* ui, int duelist_index) {
-    //while (true) {
-        //int totalPlayers;
-        //std::cout << "Enter the total number of players (up to 12): ";
-        //std::cin >> totalPlayers;
-        //std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Clear the input buffer
-        //system("CLS");
+    
+    const int tableWidth = 86;
+    const int tableHeight = 32;
+    std::vector<std::string> screenBuffer(tableHeight, std::string(tableWidth, ' '));
+    zeroWidthCharactersByRow.clear();
 
-        //if (totalPlayers < 2 || totalPlayers > 12) {
-        //    std::cout << "Number of players must be between 2 and 12." << std::endl;
-        //    continue;
-        //}
+    int centerX = tableWidth / 2;
+    int centerY = tableHeight / 2;
 
-        const int tableWidth = 86;
-        const int tableHeight = 32;
-        std::vector<std::string> screenBuffer(tableHeight, std::string(tableWidth, ' '));
-        zeroWidthCharactersByRow.clear();
-
-        int centerX = tableWidth / 2;
-        int centerY = tableHeight / 2;
-
-        double startAngle = 3 * M_PI / 2;
+    double startAngle = 3 * M_PI / 2;
          
-        int totalPlayers = duelists.size();
+    int totalPlayers = duelists.size();
 
-        double radiusScaleFactor = 0.5 + 0.04 * (duelists.size() - 1);
-        int radiusX = static_cast<int>((centerX - 10) * radiusScaleFactor);
-        int radiusY = static_cast<int>((centerY - 5) * radiusScaleFactor * 2);
+    double radiusScaleFactor = 0.5 + 0.04 * (duelists.size() - 1);
+    int radiusX = static_cast<int>((centerX - 10) * radiusScaleFactor);
+    int radiusY = static_cast<int>((centerY - 5) * radiusScaleFactor * 2);
 
-        PrintTopCard(centerX, centerY, screenBuffer);
+    PrintTopCard(centerX, centerY, screenBuffer);
 
-        for (int i = 0; i < totalPlayers; ++i) {
-            double angle = startAngle - (2 * M_PI * i / totalPlayers);
-            if (angle < 0) angle += 2 * M_PI;
 
-            int x = static_cast<int>(centerX + radiusX * cos(angle));
-            int y = static_cast<int>(centerY - (radiusY * sin(angle) / 2));
+    // ======    ======
 
-            //Duelist player("Player " + std::to_string(i + 1), 7);
-            DrawDuelist(*duelists[i], x, y, screenBuffer, i == duelist_index);
+
+    for (int i = 0; i < totalPlayers; ++i) {
+        double angle = startAngle - (2 * M_PI * i / totalPlayers);
+        if (angle < 0) angle += 2 * M_PI;
+
+        int x = static_cast<int>(centerX + radiusX * cos(angle));
+        int y = static_cast<int>(centerY - (radiusY * sin(angle) / 2));
+
+        //Duelist player("Player " + std::to_string(i + 1), 7);
+        DrawDuelist(*duelists[i], x, y, screenBuffer, i == duelist_index);
+    }
+
+    // Determine the first and last rows with content
+    int firstRowWithContent = screenBuffer.size(), lastRowWithContent = 0;
+    for (int i = 0; i < screenBuffer.size(); ++i) {
+        if (!IsStringEmpty(screenBuffer[i])) {
+            firstRowWithContent = std::min(firstRowWithContent, i);
+            lastRowWithContent = i;
         }
+    }
 
-        // Determine the first and last rows with content
-        int firstRowWithContent = screenBuffer.size(), lastRowWithContent = 0;
-        for (int i = 0; i < screenBuffer.size(); ++i) {
-            if (!IsStringEmpty(screenBuffer[i])) {
-                firstRowWithContent = std::min(firstRowWithContent, i);
-                lastRowWithContent = i;
-            }
-        }
 
-        //DrawLine();
+    // ======    ======
+    
 
-        std::stringstream screenData;
-        screenData << std::endl;
-        for (int i = firstRowWithContent; i <= lastRowWithContent; ++i) {
-            screenData << screenBuffer[i] << std::endl;
-        }
-        screenData << std::endl;
-        //DrawLine();
+    // DrawLine();
 
-        ui->SetScene(screenData.str());
-    //}
+    std::stringstream screenData;
+    screenData << std::endl;
+    for (int i = firstRowWithContent; i <= lastRowWithContent; ++i) {
+        screenData << screenBuffer[i] << std::endl;
+    }
+    screenData << std::endl;
+    //DrawLine();
+
+    ui->SetScene(screenData.str());
 }
 
 
 void GameplayScene::DrawCard(std::vector<Card>& target) {
-    if (drawDeck.size() == 0) {
+    if (drawDeck.size() == 0)
         return;
-    }
     Card card = std::move(drawDeck.back()); // Move the top card into 'card'
     drawDeck.pop_back(); // This is now safe; 'card' is no longer tied to the 'matchDeck'
     target.push_back(card);
@@ -429,16 +416,23 @@ void GameplayScene::PlayMatch()
     //
     UserInterface matchUI = *userInterface; // Keep state (only change copy)
 
-    // use_card_func
-    //
+
+    // ======( )  use_card_func  ( )====== //
+    //                                     
+    //                                     
     auto* discardDeckRef = &discardDeck;
     auto* playerUsedCardRef = &playerUsedCard;
     auto use_card_func = [discardDeckRef, playerUsedCardRef](std::vector<Card>& container, int cardIndex)
     {
-        auto& card = container[cardIndex];
-        // can use if has same color]
+        if (discardDeckRef->size() == 0)
+            return;
+
+        // can use if has same color, or numbered card same number
         //
-        if (card.colorID == discardDeckRef->back().colorID) {
+        auto& card = container[cardIndex];
+        if (card.colorID == discardDeckRef->back().colorID
+            || (card.typeID == Card::NUMBERED && card.number == discardDeckRef->back().number)
+            || (card.typeID == discardDeckRef->back().typeID)) {
             
             // add to discardDeck
             //
@@ -452,8 +446,10 @@ void GameplayScene::PlayMatch()
         }
     };
 
-    // Init Duelists card
-    //
+
+    // ======( )  Init Duelists deck  ( )======
+    //                                     
+    //                                     
     for (size_t duelist_index = 0; duelist_index < duelists.size(); duelist_index++)
     {
         // Give total (duelistInitialHandSize) cards 
