@@ -359,9 +359,9 @@ auto UserInterface::Draw() -> void
 	// Build screenData
 	// 
 	std::stringstream screenData;
-	screenData << " " << title << std::endl ;
-	screenData << " " << scene << std::endl ;
-	screenData << " " << userOptions << std::endl ;
+	screenData << " " << title << std::endl << std::endl;
+	screenData << " " << scene << std::endl << std::endl;
+	screenData << " " << userOptions << std::endl << std::endl;
 	screenData << " " << userMessage;
 
 	// Print screenData

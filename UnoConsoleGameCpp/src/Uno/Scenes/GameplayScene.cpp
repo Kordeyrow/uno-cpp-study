@@ -450,9 +450,10 @@ void GameplayScene::PlayMatch()
     auto* skipRef = &skip;
     auto* duelistUsedCardRef = &duelistTurnActionDone;
     auto* playerUsedCardRef = &playerTurnActionDone;
+    auto* dirRef = &dir;
 
     auto use_card_func = 
-        [discardDeckRef, duelistUsedCardRef, cardsToBuy_2Ref, skipRef, playerUsedCardRef]
+        [discardDeckRef, duelistUsedCardRef, cardsToBuy_2Ref, skipRef, playerUsedCardRef, dirRef]
         (std::vector<Card>& container, int cardIndex, bool isPlayer)
     {
         if (discardDeckRef->size() == 0)
@@ -482,6 +483,10 @@ void GameplayScene::PlayMatch()
 
             if (card.typeID == Card::DRAW_2) {
                 *cardsToBuy_2Ref += 2;
+            }
+
+            if (card.typeID == Card::REVERSE) {
+                *dirRef *= -1;
             }
 
             // add to discardDeck
@@ -562,14 +567,26 @@ void GameplayScene::PlayMatch()
             duelistTurnActionDone = false;
             // AI duelist turns
             //
-            for (size_t duelist_index = 1; duelist_index < duelists.size(); duelist_index++)
-            {
+            int currentDuelistIndex = 0;
+
+            if (dir == 1)
+                currentDuelistIndex = 1;
+            if (dir == -1)
+                currentDuelistIndex = duelists.size() - 1;
+
+            // while not player turn
+            //
+            while (currentDuelistIndex != 0) {
+
                 // delay
                 //
-                DrawTable(&matchUI, duelist_index);
+                DrawTable(&matchUI, currentDuelistIndex);
 
                 if (skip) {
                     skip = false;
+                    currentDuelistIndex += dir;
+                    if (currentDuelistIndex >= duelists.size())
+                        currentDuelistIndex = 0;
                     continue;
                 }
                 std::this_thread::sleep_for(std::chrono::milliseconds(2500));
@@ -577,7 +594,7 @@ void GameplayScene::PlayMatch()
                 // Give total (duelistInitialHandSize) cards 
                 //  for each duelist, from shuffled matchDeck
                 //
-                auto& deck = duelists[duelist_index]->hand->deck;
+                auto& deck = duelists[currentDuelistIndex]->hand->deck;
 
                 // can use if has same color]
                 //                
@@ -595,25 +612,20 @@ void GameplayScene::PlayMatch()
                 }
                 else {
                     if (cardsToBuy_2 > 0) {
-                        for (size_t i = 0; i < cardsToBuy_2; i++){
-                            DrawCard(duelists[duelist_index]->hand->deck);
+                        for (size_t i = 0; i < cardsToBuy_2; i++) {
+                            DrawCard(duelists[currentDuelistIndex]->hand->deck);
                         }
                         cardsToBuy_2 = 0;
                     }
                     else {
-                        DrawCard(duelists[duelist_index]->hand->deck);
+                        DrawCard(duelists[currentDuelistIndex]->hand->deck);
                     }
                 }
+
+                currentDuelistIndex += dir;
+                if (currentDuelistIndex >= duelists.size())
+                    currentDuelistIndex = 0;
             }
-            /*for (size_t i = 0; i < player_deck.size(); i++)
-            {
-                auto& card = player_deck[i];
-                matchUI.AddUserOptions({
-                       std::make_shared<UserOptionData>(
-                       card.ColoredDescription(),
-                       SIMPLE_FUNC_REF(use_card_func, player_deck, i))
-                    });
-            }*/
         }
 
         DrawTable(&matchUI, 0);

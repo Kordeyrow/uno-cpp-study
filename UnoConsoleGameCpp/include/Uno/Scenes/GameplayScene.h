@@ -130,6 +130,7 @@ private:
     int discardColorID;
     int duelistInitialHandSize = 7;
     bool endSetPlayers = false;
+    int dir = 1;
 
     bool playerTurnActionDone = false;
     bool duelistTurnActionDone = false;
