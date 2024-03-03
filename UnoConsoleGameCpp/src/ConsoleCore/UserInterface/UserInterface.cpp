@@ -283,6 +283,8 @@ bool UserInterface::ArrowMoveSelection(char input)
 	return false;
 }
 
+
+
 void UserInterface::ReadOptionAndExecute(char input, bool thread) {
 
 	ShowOptions(currentSelectedIndex);
@@ -306,11 +308,11 @@ void UserInterface::ReadOptionAndExecute(char input, bool thread) {
 	if (ArrowMoveSelection(input))
 		return;
 
-	if (thread) {
+	/*if (thread) {
 		while (_kbhit())
 			_getch();
 		return;
-	}
+	}*/
 
 	// Execute chosen
 	//

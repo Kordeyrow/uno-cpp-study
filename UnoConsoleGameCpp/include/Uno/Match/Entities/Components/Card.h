@@ -17,6 +17,8 @@ public:
 	constexpr static int GREEN = 32;
 	constexpr static int YELLOW = 33;
 	constexpr static int BLUE = 34;
+	constexpr static int NONE = 0;
+	constexpr static int ALL = -1;
 
 	// Type IDs (description)
 	//

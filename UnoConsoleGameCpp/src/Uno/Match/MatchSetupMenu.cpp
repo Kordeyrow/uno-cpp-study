@@ -14,7 +14,7 @@ MatchSetupMenu::MatchSetupMenu(
 void MatchSetupMenu::CreateUserActions()
 {
     userOptionDataList.push_back(std::make_shared<UserOptionData>(
-        "Configure Match",
+        "Match",
         std::bind(&MatchSetupMenu::ConfigureMatch, this)));
 
     userOptionDataList.push_back(std::make_shared<UserOptionData>(
@@ -31,7 +31,7 @@ void MatchSetupMenu::CreateUserActions()
 }
 
 void MatchSetupMenu::StartGame() {
-    userInterface->SetScene("Starting game...");
+    //userInterface->SetScene("Starting game...");
 }
 
 void MatchSetupMenu::ViewRules() {
@@ -42,11 +42,11 @@ void MatchSetupMenu::ViewRules() {
 }
 
 void MatchSetupMenu::ConfigureMatch() {
-    userInterface->SetScene("Configuring up match...");
+    //userInterface->SetScene("Configuring up match...");
     setNextScene(std::make_shared<GameplayScene>());
 }
 
 void MatchSetupMenu::Exit() {
-    userInterface->SetScene("Exiting game...");
+    //userInterface->SetScene("Exiting game...");
     setNextScene(nullptr);
 }

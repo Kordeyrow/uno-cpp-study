@@ -60,15 +60,15 @@ auto GameplayScene::Init() -> void
     userInterface->AddUserOptions({
 
         std::make_shared<UserOptionData>(
-            "Increase total duelists",
+            "Add new Duelist",
             std::bind(&GameplayScene::IncreaseTotalDuelists, this)),
 
         std::make_shared<UserOptionData>(
-            "Decrease total duelists",
+            "Remove last Duelist",
             std::bind(&GameplayScene::DecreaseTotalDuelists, this)),
 
         std::make_shared<UserOptionData>(
-            "Set duelists names",
+            "Update Duelists names",
             std::bind(&GameplayScene::SetPlayersNames, this)),
 
         std::make_shared<UserOptionData>(
@@ -79,7 +79,7 @@ auto GameplayScene::Init() -> void
 
 auto GameplayScene::Run() -> std::shared_ptr<BaseScene>
 {
-    userInterface->SetScene("totalDuelists = " + std::to_string(duelists.size()));
+    userInterface->SetScene("Total Duelists = " + std::to_string(duelists.size()));
     userInterface->ReadOptionAndExecute();
     return shared_from_this();
 }
@@ -203,16 +203,10 @@ void GameplayScene::DrawDuelist(
     // ANSI escape code for yellow foreground
 
     std::string duelistColor = "\033[33m"; // yellow
-
     if (gameover)
-    {
-        duelistColor = "\033[31m"; // red
-    }
-
+        duelistColor = "\033[31m"; // red (loser)
     if (winner)
-    {
-        duelistColor = "\033[32m"; // green
-    }
+        duelistColor = "\033[32m"; // green (winner)
 
     // ANSI escape code to reset styling
     std::string resetStyle = "\033[0m";
@@ -483,6 +477,9 @@ void GameplayScene::WaitForAnyKeyOrDelay(UserInterface* matchUI) {
             //break;
         }
 
+        if (wildPlayed)
+            break;
+
         now = high_resolution_clock::now();
 
         //elapsed_seconds = end - start;
@@ -545,6 +542,9 @@ void GameplayScene::DrawCard(std::vector<Card>& targetDeck) {
 
 void GameplayScene::PlayerOptionDrawCard() {
 
+    if (playerTurn == false)
+        return;
+
     if (cardsToBuy_2 > 0) {
         for (size_t i = 0; i < cardsToBuy_2; i++) {
             DrawCard(duelists[0]->hand->deck);
@@ -559,6 +559,10 @@ void GameplayScene::PlayerOptionDrawCard() {
 }
 
 void GameplayScene::SayUno() {
+
+    if (playerTurn == false)
+        return;
+
     playerSaidUno = true;
     matchUII->currentSelectedIndex = matchUII->currentSelectedIndex - 1;
 }
@@ -611,56 +615,85 @@ void GameplayScene::PlayMatch()
     auto* playerUsedCardRef = &playerTurnActionDone;
     auto* dirRef = &dir;
     auto* winnerRef = &winner;
+    auto* playerTurnRef = &playerTurn;
+    auto* wildPlayedRef = &wildPlayed;
 
     auto use_card_func = 
-        [discardDeckRef, duelistUsedCardRef, cardsToBuy_2Ref, skipRef, playerUsedCardRef, dirRef, winnerRef]
+        [discardDeckRef, duelistUsedCardRef, cardsToBuy_2Ref, skipRef, playerUsedCardRef, dirRef, winnerRef, playerTurnRef, wildPlayedRef]
         (std::shared_ptr<Duelist> duelist, std::vector<Card>& container, int cardIndex, bool isPlayer)
     {
+
         if (discardDeckRef->size() == 0)
             return;
 
-        // can use if has same color, or numbered card same number
-        //
+
         auto& card = container[cardIndex];
 
-        if (*cardsToBuy_2Ref > 0 && card.typeID != Card::DRAW_2) {
+
+        // can use if has same color, or numbered card same number
+        //
+        if (*cardsToBuy_2Ref > 0 
+            && card.typeID != Card::DRAW_2 
+            && card.typeID != Card::WILD_DRAW_4) {
             return;
         }
 
+
+        // can use if has same color, or numbered card same number
+        //
         if (card.typeID == Card::NUMBERED) {
             if (card.number != discardDeckRef->back().number 
-                && card.colorID != discardDeckRef->back().colorID) {
+                && card.colorID != discardDeckRef->back().colorID
+                && discardDeckRef->back().colorID != Card::ALL) {
                 return;
             }
         }
 
-        if ((card.colorID == discardDeckRef->back().colorID)
-            || (card.typeID == discardDeckRef->back().typeID)) {
-            
-            if (card.typeID == Card::SKIP) {
-                *skipRef = true;
-            }
-
-            if (card.typeID == Card::DRAW_2) {
-                *cardsToBuy_2Ref += 2;
-            }
-
-            if (card.typeID == Card::REVERSE) {
-                *dirRef *= -1;
-            }
-
-            // add to discardDeck
-            //
-            discardDeckRef->push_back(card);
-
-            // remove from play deck1
-            //
-            container.erase(container.begin() + cardIndex);
-
-            *duelistUsedCardRef = true;
-            if (isPlayer)
-                *playerUsedCardRef = true;
+        if ((discardDeckRef->back().colorID != Card::ALL && card.colorID != discardDeckRef->back().colorID)
+            && (card.typeID != discardDeckRef->back().typeID)
+            && card.typeID != Card::WILD_DRAW_4) {
+            return;
         }
+
+        if (isPlayer 
+            && *playerTurnRef == false
+            && card.typeID != Card::WILD_DRAW_4)
+            return;
+
+
+        //aaa
+
+        if (card.typeID == Card::SKIP) {
+            *skipRef = true;
+        }
+
+        if (card.typeID == Card::DRAW_2) {
+            *cardsToBuy_2Ref += 2;
+        }
+
+        if (card.typeID == Card::REVERSE) {
+            *dirRef *= -1;
+        }
+
+        if (card.typeID == Card::WILD_DRAW_4) {
+            if (isPlayer
+                && *playerTurnRef == false)
+                *wildPlayedRef = true;
+
+            *cardsToBuy_2Ref += 4;
+        }
+
+        // add to discardDeck
+        //
+        discardDeckRef->push_back(card);
+
+        // remove from play deck1
+        //
+        container.erase(container.begin() + cardIndex);
+
+        *duelistUsedCardRef = true;
+        if (isPlayer)
+            *playerUsedCardRef = true;
 
         if (container.size() == 0) {
             *winnerRef = duelist;
@@ -700,6 +733,8 @@ void GameplayScene::PlayMatch()
     // Turn Manager 
     //
     while (true) {
+
+        playerTurn = false;
 
         // Options (player cards)
         //
@@ -754,11 +789,16 @@ void GameplayScene::PlayMatch()
         matchUI.currentSelectedIndex = lastOptionIndex;
         matchUI.ShowOptions();
 
+        // Start duelists turns
+        //
         if (playerTurnActionDone) {
 
             DrawTable(&matchUI, 0, false);
             if (skip == false) {
                 WaitForAnyKeyOrDelay(&matchUI);
+            }
+            if (wildPlayed == false) {
+
             }
 
             playerTurnActionDone = false;
@@ -772,9 +812,10 @@ void GameplayScene::PlayMatch()
             if (dir == -1)
                 currentDuelistIndex = duelists.size() - 1;
 
+            
             // while not player turn
             //
-            while (currentDuelistIndex != 0) {
+            while (currentDuelistIndex != 0 && duelists[0]->hand->deck.size() != 0) {
 
                 // delay
                 //
@@ -788,6 +829,8 @@ void GameplayScene::PlayMatch()
 
                 DrawTable(&matchUI, currentDuelistIndex, false);
                 WaitForAnyKeyOrDelay(&matchUI);
+                if (wildPlayed)
+                    break;
 
                 // Give total (duelistInitialHandSize) cards 
                 //  for each duelist, from shuffled matchDeck
@@ -826,6 +869,8 @@ void GameplayScene::PlayMatch()
 
                 DrawTable(&matchUI, currentDuelistIndex, false);
                 WaitForAnyKeyOrDelay(&matchUI);
+                if (wildPlayed)
+                    break;
 
                 currentDuelistIndex += dir;
                 if (currentDuelistIndex >= duelists.size())
@@ -833,7 +878,22 @@ void GameplayScene::PlayMatch()
             }
         }
 
-        if (duelists[0]->hand->deck.size() == 1 && playerSaidUno == false && playerTurnActionDone == false) {
+        // End duelists turns
+
+        //aaa
+        if (wildPlayed) {
+            playerTurn = false;
+            wildPlayed = false;
+        }
+        else
+            playerTurn = skip == false;
+        skip = false;
+
+        // UNO Busted! (player didnt say uno)
+        //
+        if (duelists[0]->hand->deck.size() == 1 
+            && playerSaidUno == false 
+            && playerTurnActionDone == false) {
 
             matchUI.ClearOptions();
             auto& player = duelists[0];
@@ -852,23 +912,27 @@ void GameplayScene::PlayMatch()
 
         DrawTable(&matchUI, 0, false);
         
-        if (winner == nullptr) {
-            // Player Action
+        if (winner == nullptr && playerTurn) {
+            // Skip? Player 
             //
-            if (skip) {
+            if (skip && wildPlayed) {
                 skip = false;
                 playerTurnActionDone = true;
             }
+            // Player Action
+            //
             else {
                 matchUI.ReadOptionAndExecute();
                 lastOptionIndex = matchUI.currentSelectedIndex;
                 DrawTable(&matchUI, 0, false);
                 //SafeGetChar();
+                if (winner)
+                    winnerIndex = 0;
             }
-            if (winner)
-                winnerIndex = 0;
         }
 
+        // Show winner
+        //
         if (winner != nullptr) {
             matchUI.SetUserOptions({});
             DrawTable(&matchUI, winnerIndex, true);

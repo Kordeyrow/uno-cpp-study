@@ -111,16 +111,16 @@ public:
 
         // "wild_draw+4" cards (4 total), 1 for each color
         //
-        //for (size_t i = 0; i < 4; i++)
-        //{
-        //    // 2 cards of each
-        //    //
-        //    deck.emplace_back(
-        //        Card::WILD_DRAW_4,
-        //        Card::colors[i]
-        //    );
-        //    //std::cout << "draw+2/" << i << "  ";
-        //}
+        for (size_t i = 0; i < 40; i++)
+        {
+            // 2 cards of each
+            //
+            deck.emplace_back(
+                Card::WILD_DRAW_4,
+                Card::NONE
+            );
+            //std::cout << "draw+2/" << i << "  ";
+        }
 
         //_getch();
 
@@ -130,13 +130,15 @@ public:
 
 private:
 
+    bool wildPlayed = false;
+
     bool playerSaidUno = false;
     bool playerJustSaidUno = false;
 
     int maxDuelists = 12;
     int minDuelists = 2;
     int startDuelists = 4;
-    int duelistInitialHandSize = 1;
+    int duelistInitialHandSize = 7;
     float turnActionDelay = 1.3;
 
     UserInterface* matchUII;
@@ -158,6 +160,8 @@ private:
     //Card discardPileTopCard;
     bool endSetPlayers = false;
     int dir = 1;
+
+    bool playerTurn;
 
     bool playerTurnActionDone = false;
     bool duelistTurnActionDone = false;
