@@ -7,7 +7,7 @@
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 #define CLAMP(x, upper, lower) (MIN(upper, MAX(x, lower)))
 
-//#define SIMPLE_FUNC_REF(callable, arg) [&]() { callable(arg); }
+#define SIMPLE_VOID_FUNC_REF(callable, arg) [&]() { callable(arg); }
 //#define SIMPLE_FUNC_REF(callable, ...) [__VA_ARGS__]() mutable { callable(__VA_ARGS__); }
 //#define SIMPLE_FUNC_REF(callable, ...) [&]() mutable { callable(__VA_ARGS__); }
 //#define SIMPLE_FUNC_REF(callable, ...) [&, __VA_ARGS__]() mutable { callable(__VA_ARGS__); }
@@ -575,7 +575,7 @@ void GameplayScene::SayUno() {
         return;
 
     playerSaidUno = true;
-    matchUII->currentSelectedIndex = matchUII->currentSelectedIndex - 1;
+    publicSharedMatchUI->currentSelectedIndex = publicSharedMatchUI->currentSelectedIndex - 1;
 }
 
 void GameplayScene::PlayMatch()
@@ -614,7 +614,7 @@ void GameplayScene::PlayMatch()
     // MatchUI
     //
     UserInterface matchUI = *userInterface; // Keep state (only change copy)
-    matchUII = &matchUI;
+    publicSharedMatchUI = &matchUI;
 
     // ======( )  use_card_func  ( )====== //
     //                                     
@@ -629,9 +629,10 @@ void GameplayScene::PlayMatch()
     auto* winnerRef = &winner;
     auto* playerTurnRef = &playerTurn;
     auto* wildPlayedRef = &wildPlayed;
+    auto* publicSharedMatchUIRef = &publicSharedMatchUI;
 
     auto use_card_func = 
-        [discardDeckRef, duelistUsedCardRef, cardsToBuy_2Ref, cardsToBuy_4Ref, skipRef, playerUsedCardRef, dirRef, winnerRef, playerTurnRef, wildPlayedRef]
+        [discardDeckRef, duelistUsedCardRef, cardsToBuy_2Ref, cardsToBuy_4Ref, skipRef, playerUsedCardRef, dirRef, winnerRef, playerTurnRef, wildPlayedRef, publicSharedMatchUIRef]
         (std::shared_ptr<Duelist> duelist, std::vector<Card>& container, int cardIndex, bool isPlayer)
     {
 
@@ -699,6 +700,34 @@ void GameplayScene::PlayMatch()
                 *wildPlayedRef = true;
 
             *cardsToBuy_4Ref += 4;
+
+
+            // CHOSE COLOR
+            //
+            //UserInterface matchUI = *userInterface; // Keep state (only change copy)
+            UserInterface choseColorUI = **publicSharedMatchUIRef;
+
+            int color = 0;
+            /*auto chose_color_func =
+                [&color]
+            ()
+            {
+                color = 31;
+            }*/
+
+            choseColorUI.ClearOptions();
+            choseColorUI.AddUserOptions({
+                std::make_shared<UserOptionData>(
+                    "Red",
+                    [&color]() { color = 32; }
+                )
+                });
+            choseColorUI.ShowOptions();
+
+            choseColorUI.ReadOptionAndExecute();
+
+            //choseColorUI.currentSelectedIndex = 0;
+            //playerSaidUno = false;
         }
 
         // add to discardDeck

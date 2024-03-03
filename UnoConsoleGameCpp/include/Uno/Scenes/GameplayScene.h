@@ -141,7 +141,7 @@ private:
     int duelistInitialHandSize = 7;
     float turnActionDelay = 1.3;
 
-    UserInterface* matchUII;
+    UserInterface* publicSharedMatchUI;
 
     void UpdateOptions();
     void SayUno();
