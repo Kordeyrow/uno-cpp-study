@@ -48,7 +48,7 @@ GameplayScene::GameplayScene()
 
     for (size_t i = 0; i < startDuelists -1; i++)
     {
-        duelists.emplace_back(std::make_shared<Duelist>("Duelist " + std::to_string(i), duelistInitialHandSize));
+        duelists.emplace_back(std::make_shared<Duelist>("Duelist " + std::to_string(i+2), duelistInitialHandSize));
     }
     //minDuelists
 }
@@ -90,6 +90,7 @@ void GameplayScene::BackFromSetPlayersNames() {
 void GameplayScene::SetPlayersNames() {
 
     userInterface->SetScene("");
+    //userInterface->
 
     // Keep state (only change copy)
     //
@@ -186,12 +187,32 @@ void GameplayScene::DecreaseTotalDuelists() {
 
 
 
-void GameplayScene::DrawDuelist(const Duelist& duelist, int colIndex, int rowIndex, std::vector<std::string>& asciiTable, bool highlight) {
+void GameplayScene::DrawDuelist(
+    const Duelist& duelist, 
+    int colIndex, 
+    int rowIndex, 
+    std::vector<std::string>& asciiTable, 
+    bool highlight,
+    bool winner,
+    bool gameover) 
+{
     int tableWidth = asciiTable[0].size();
     int tableHeight = asciiTable.size();
 
     // ANSI escape code for yellow foreground
-    std::string yellowForeground = "\033[33m";
+
+    std::string duelistColor = "\033[33m"; // yellow
+
+    if (gameover)
+    {
+        duelistColor = "\033[31m"; // green
+    }
+
+    if (winner)
+    {
+        duelistColor = "\033[36m"; // green
+    }
+
     // ANSI escape code to reset styling
     std::string resetStyle = "\033[0m";
 
@@ -199,7 +220,7 @@ void GameplayScene::DrawDuelist(const Duelist& duelist, int colIndex, int rowInd
     int playerLabelSize = playerLabel.length();;
 
     // Generate the player's label with their name
-    playerLabel = highlight ? yellowForeground + playerLabel + resetStyle : playerLabel;
+    playerLabel = highlight ? duelistColor + playerLabel + resetStyle : playerLabel;
 
     // Calculate the starting position for the player's label
     int labelStartX = colIndex - playerLabelSize / 2;
@@ -223,7 +244,7 @@ void GameplayScene::DrawDuelist(const Duelist& duelist, int colIndex, int rowInd
     std::string handString = duelist.hand->PrintHand();
     int handStringSize = handString.length();
     if (highlight)
-        handString = yellowForeground + handString + resetStyle;
+        handString = duelistColor + handString + resetStyle;
 
     // Calculate the starting position for the player's hand
     int handStartX = colIndex - handStringSize / 2;
@@ -265,12 +286,14 @@ void GameplayScene::PrintTopCard(int centerX, int centerY, std::vector<std::stri
         return;
     }
 
+    auto descriptionTextArea = 11 - 2; // "|         |" - "|" "|"
+
     int var = 1;
     int descriptionSize = discardDeck.back().RawDescription().size();
-    int spaceCountLeft = (8 - descriptionSize) / 2;
+    int spaceCountLeft = (descriptionTextArea - descriptionSize) / 2;
     if (spaceCountLeft < 0)
         spaceCountLeft = 0;
-    int spaceCountRight = spaceCountLeft + ((8 - descriptionSize) % 2) ;
+    int spaceCountRight = spaceCountLeft + ((descriptionTextArea - descriptionSize) % 2) ;
     if (spaceCountRight < 0)
         spaceCountRight = 0;
 
@@ -278,13 +301,13 @@ void GameplayScene::PrintTopCard(int centerX, int centerY, std::vector<std::stri
     std::string spacesRight = std::string(spaceCountRight, ' ');
 
     std::vector<std::string> cardDrawTable = {
-        " -------- ",
-        "|        |",
-        "|        |",
+        " --------- ",
+        "|         |",
+        "|         |",
         "|" + spacesLeft + discardDeck.back().ColoredDescription() + spacesRight + "|",
-        "|        |",
-        "|        |",
-        " -------- "
+        "|         |",
+        "|         |",
+        " --------- "
     };
 
     int totalCardRows = cardDrawTable.size(); // Height of the card representation
@@ -349,7 +372,7 @@ void DrawLine(int count) {
 
 
 
-void GameplayScene::DrawTable(UserInterface* ui, int duelist_index, bool winner) {
+void GameplayScene::DrawTable(UserInterface* ui, int current_duelist_index, bool winner) {
     
     const int tableWidth = 86;
     const int tableHeight = 32;
@@ -381,7 +404,7 @@ void GameplayScene::DrawTable(UserInterface* ui, int duelist_index, bool winner)
         int y = static_cast<int>(centerY - (radiusY * sin(angle) / 2));
 
         //Duelist player("Player " + std::to_string(i + 1), 7);
-        DrawDuelist(*duelists[i], x, y, screenBuffer, i == duelist_index);
+        DrawDuelist(*duelists[i], x, y, screenBuffer, i == current_duelist_index, winner ? i == current_duelist_index : false, winner);
     }
 
     // Determine the first and last rows with content
@@ -410,6 +433,31 @@ void GameplayScene::DrawTable(UserInterface* ui, int duelist_index, bool winner)
     ui->SetScene(screenData.str());
 }
 
+void WaitForAnyKeyOrDelay() {
+
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+    //auto input = _getch();
+    //if (input == (char)224) {
+    //    // Move selected index
+    //    //
+    //    auto input = _getch();
+    //}
+    //while (_kbhit())
+    //    _getch();
+}
+
+void WaitForAnyKey() {
+    auto input = _getch();
+    if (input == (char)224) {
+        // Move selected index
+        //
+        auto input = _getch();
+    }
+    while (_kbhit())
+        _getch();
+}
 
 void GameplayScene::DrawCard(std::vector<Card>& target) {
     if (drawDeck.size() == 0)
@@ -448,12 +496,21 @@ void GameplayScene::PlayMatch()
     dir = 1;
     playerTurnActionDone = false;
     duelistTurnActionDone = false;
+    auto duelistsCopy = duelists;
     duelists = {};
-    duelists.emplace_back(std::make_shared<Duelist>("Player", duelistInitialHandSize));
+
+    for (size_t i = 0; i < duelistsCopy.size(); i++)
+    {
+        duelists.emplace_back(std::make_shared<Duelist>(duelistsCopy[i]->name, duelistInitialHandSize));
+    }
+
+    /*duelists.emplace_back(std::make_shared<Duelist>("Player", duelistInitialHandSize));
     for (size_t i = 0; i < startDuelists - 1; i++)
     {
         duelists.emplace_back(std::make_shared<Duelist>("Duelist " + std::to_string(i), duelistInitialHandSize));
-    }
+    }*/
+
+
     drawDeck = ShuffleDeck(CreateMatchDeck());
 
     // winner
@@ -552,7 +609,7 @@ void GameplayScene::PlayMatch()
     /*for (Card& card : matchDeck) {
         std::cout << card.ColoredDescription() << std::endl;
     }
-    _getch();*/
+    SafeGetChar();*/
 
     int lastOptionIndex = 0;
 
@@ -563,19 +620,18 @@ void GameplayScene::PlayMatch()
         // Options (player cards)
         //
         matchUI.ClearOptions();
-        auto& duelist = duelists[0];
-        auto& duelist_deck = duelist->hand->deck;
-        for (size_t i = 0; i < duelist_deck.size(); i++)
+        auto& player = duelists[0];
+        auto& player_deck = player->hand->deck;
+        for (size_t i = 0; i < player_deck.size(); i++)
         {
-            auto& card = duelist_deck[i];
+            auto& card = player_deck[i];
             matchUI.AddUserOptions({
                    std::make_shared<UserOptionData>(
                        card.ColoredDescription(),
-                       SIMPLE_FUNC_REF(use_card_func, duelist, duelist_deck, i, true)
+                       SIMPLE_FUNC_REF(use_card_func, player, player_deck, i, true)
                    )
                 });
         }
-
         matchUI.AddUserOptions({
                std::make_shared<UserOptionData>(
                    "Draw Card",
@@ -589,6 +645,9 @@ void GameplayScene::PlayMatch()
         matchUI.ShowOptions();
 
         if (playerTurnActionDone) {
+
+            DrawTable(&matchUI, 0, false);
+            WaitForAnyKeyOrDelay();
 
             playerTurnActionDone = false;
             duelistTurnActionDone = false;
@@ -607,8 +666,6 @@ void GameplayScene::PlayMatch()
 
                 // delay
                 //
-                DrawTable(&matchUI, currentDuelistIndex, false);
-
                 if (skip) {
                     skip = false;
                     currentDuelistIndex += dir;
@@ -616,13 +673,14 @@ void GameplayScene::PlayMatch()
                         currentDuelistIndex = 0;
                     continue;
                 }
-                std::this_thread::sleep_for(std::chrono::milliseconds(turnActionDelay));
+
+                DrawTable(&matchUI, currentDuelistIndex, false);
+                WaitForAnyKeyOrDelay();
 
                 // Give total (duelistInitialHandSize) cards 
                 //  for each duelist, from shuffled matchDeck
                 //
                 auto& deck = duelists[currentDuelistIndex]->hand->deck;
-
                 // can use if has same color]
                 //                
                 for (size_t card_index = 0; card_index < deck.size(); card_index++)
@@ -654,6 +712,9 @@ void GameplayScene::PlayMatch()
                     }
                 }
 
+                DrawTable(&matchUI, currentDuelistIndex, false);
+                WaitForAnyKeyOrDelay();
+
                 currentDuelistIndex += dir;
                 if (currentDuelistIndex >= duelists.size())
                     currentDuelistIndex = 0;
@@ -673,6 +734,9 @@ void GameplayScene::PlayMatch()
             else {
                 matchUI.ReadOptionAndExecute();
                 lastOptionIndex = matchUI.currentSelectedIndex;
+
+                DrawTable(&matchUI, 0, false);
+                //SafeGetChar();
             }
             if (winner)
                 winnerIndex = 0;
@@ -680,8 +744,14 @@ void GameplayScene::PlayMatch()
 
         if (winner != nullptr) {
             matchUI.SetUserOptions({});
-            DrawTable(&matchUI, 0, true);
-            _getch();
+            DrawTable(&matchUI, winnerIndex, true);
+            matchUI.SetUserMessage(
+                "\n"
+                " GAME OVER !"
+                "\n" 
+                " Winner is " + winner->name
+            );
+            WaitForAnyKey();
             break;
         }
 

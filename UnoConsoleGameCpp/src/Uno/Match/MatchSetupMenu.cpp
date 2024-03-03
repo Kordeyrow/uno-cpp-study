@@ -35,7 +35,10 @@ void MatchSetupMenu::StartGame() {
 }
 
 void MatchSetupMenu::ViewRules() {
-    userInterface->SetScene("rules");
+    userInterface->SetScene("Goal: Be the first duelist to play all your cards. \n"
+        " Playing: You can play the card if it matches the one in the table. \n"
+        " Draw: If you don't have any cards to play, you are forced to draw a card \n"
+        " Special Cards: 'Numbered', 'Skip', 'Reverse', 'Draw Two'.");
 }
 
 void MatchSetupMenu::ConfigureMatch() {

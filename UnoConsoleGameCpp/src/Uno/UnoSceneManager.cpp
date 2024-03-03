@@ -3,7 +3,7 @@
 #include "Uno/UnoSceneManager.h"
 #include "Uno/Scenes/MainMenuScene.h"
 
-void hideCursor() {
+void HideCursor() {
     HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
     CONSOLE_CURSOR_INFO info;
     info.dwSize = 100; // The size of the cursor, from 1 to 100. The size is a percentage of the character cell.
@@ -11,8 +11,17 @@ void hideCursor() {
     SetConsoleCursorInfo(consoleHandle, &info);
 }
 
+void SetScreenSize() {
+    HWND console = GetConsoleWindow();
+    RECT r;
+    GetWindowRect(console, &r); //stores the console's current dimensions
+
+    MoveWindow(console, r.left, r.top, 850, 650, TRUE);
+}
+
 UnoSceneManager::UnoSceneManager() {
-    hideCursor();
+    HideCursor();
+    SetScreenSize();
     currentScene = std::make_shared<MainMenuScene>();
     currentScene->Init();
 }
@@ -33,4 +42,5 @@ auto UnoSceneManager::Run() -> void
             currentScene->Init();
         }
     }
+
 }

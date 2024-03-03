@@ -10,7 +10,7 @@ public:
     void AddUserOptions(std::vector<std::shared_ptr<UserOptionData>> option);
     void ClearOptions();
     void ShowOptions(int selectedIndex = -1, bool chosen = false);
-    void ReadOptionAndExecute(char input = -1);
+    void ReadOptionAndExecute(char input = -1, bool thread = false);
     bool ArrowMoveSelection(char input);
 
     char GetChar();

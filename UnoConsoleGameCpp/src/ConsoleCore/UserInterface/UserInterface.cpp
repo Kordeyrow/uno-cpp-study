@@ -277,9 +277,16 @@ bool UserInterface::ArrowMoveSelection(char input)
 	return false;
 }
 
-void UserInterface::ReadOptionAndExecute(char input) {
+void UserInterface::ReadOptionAndExecute(char input, bool thread) {
 
 	ShowOptions(currentSelectedIndex);
+
+	// Ignore previous inputs that are stacked from previous frames
+	
+	if (thread == false) {
+		while (_kbhit())
+			_getch();
+	}
 
 	// Input
 	//

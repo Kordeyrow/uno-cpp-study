@@ -101,16 +101,16 @@ public:
 
         // "wild_draw+4" cards (4 total), 1 for each color
         //
-        for (size_t i = 0; i < 4; i++)
-        {
-            // 2 cards of each
-            //
-            deck.emplace_back(
-                Card::WILD_DRAW_4,
-                Card::colors[i]
-            );
-            //std::cout << "draw+2/" << i << "  ";
-        }
+        //for (size_t i = 0; i < 4; i++)
+        //{
+        //    // 2 cards of each
+        //    //
+        //    deck.emplace_back(
+        //        Card::WILD_DRAW_4,
+        //        Card::colors[i]
+        //    );
+        //    //std::cout << "draw+2/" << i << "  ";
+        //}
 
         //_getch();
 
@@ -123,12 +123,19 @@ private:
     int maxDuelists = 12;
     int minDuelists = 2;
     int startDuelists = 4;
-    int duelistInitialHandSize = 7;
-    int turnActionDelay = 2200;
+    int duelistInitialHandSize = 1;
+    int turnActionDelay = 1900;
 
     void DrawCard(std::vector<Card>& target);
     void PlayerOptionDrawCard();
-    void DrawDuelist(const Duelist& duelist, int x, int y, std::vector<std::string>& asciiTable, bool highlight);
+    void DrawDuelist(
+        const Duelist& duelist, 
+        int x, 
+        int y, 
+        std::vector<std::string>& asciiTable, 
+        bool highlight,
+        bool winner,
+        bool gameover);
     void PrintTopCard(int centerX, int centerY, std::vector<std::string>& asciiTable);
     //Card discardPileTopCard;
     bool endSetPlayers = false;
@@ -136,6 +143,10 @@ private:
 
     bool playerTurnActionDone = false;
     bool duelistTurnActionDone = false;
+
+    // Exit
+    bool exitGameplay;
+    bool exitGameSetup;
 
     // Effects
     int cardsToBuy_2 = 0;
