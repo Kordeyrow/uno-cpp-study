@@ -206,12 +206,12 @@ void GameplayScene::DrawDuelist(
 
     if (gameover)
     {
-        duelistColor = "\033[31m"; // green
+        duelistColor = "\033[31m"; // red
     }
 
     if (winner)
     {
-        duelistColor = "\033[36m"; // green
+        duelistColor = "\033[32m"; // green
     }
 
     // ANSI escape code to reset styling
@@ -405,7 +405,16 @@ void GameplayScene::DrawTable(UserInterface* ui, int current_duelist_index, bool
         int y = static_cast<int>(centerY - (radiusY * sin(angle) / 2));
 
         //Duelist player("Player " + std::to_string(i + 1), 7);
-        DrawDuelist(*duelists[i], x, y, screenBuffer, i == current_duelist_index, winner ? i == current_duelist_index : false, winner);
+        auto gameIsOver = winner;
+        auto duelistIsWinner = winner ? i == current_duelist_index : false;
+        DrawDuelist(
+            *duelists[i], 
+            x, 
+            y, 
+            screenBuffer, 
+            (i == current_duelist_index) || gameIsOver,
+            duelistIsWinner,
+            gameIsOver);
     }
 
     // Determine the first and last rows with content

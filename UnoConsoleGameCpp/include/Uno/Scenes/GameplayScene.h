@@ -136,7 +136,7 @@ private:
     int maxDuelists = 12;
     int minDuelists = 2;
     int startDuelists = 4;
-    int duelistInitialHandSize = 7;
+    int duelistInitialHandSize = 1;
     float turnActionDelay = 1.3;
 
     UserInterface* matchUII;
