@@ -545,14 +545,25 @@ void GameplayScene::PlayerOptionDrawCard() {
     if (playerTurn == false)
         return;
 
-    if (cardsToBuy_2 > 0) {
-        for (size_t i = 0; i < cardsToBuy_2; i++) {
-            DrawCard(duelists[0]->hand->deck);
-        }
-        cardsToBuy_2 = 0;
+    auto& playerDeck = duelists[0]->hand->deck;
+
+    if (cardsToBuy_2 == 0
+        && cardsToBuy_4 == 0) {
+        DrawCard(playerDeck);
     }
     else {
-        DrawCard(duelists[0]->hand->deck);
+        if (cardsToBuy_4 > 0) {
+            for (size_t i = 0; i < cardsToBuy_4; i++) {
+                DrawCard(playerDeck);
+            }
+            cardsToBuy_4 = 0;
+        }
+        if (cardsToBuy_2 > 0) {
+            for (size_t i = 0; i < cardsToBuy_2; i++) {
+                DrawCard(playerDeck);
+            }
+            cardsToBuy_2 = 0;
+        }
     }
 
     playerTurnActionDone = true;
@@ -610,6 +621,7 @@ void GameplayScene::PlayMatch()
     //                                     
     auto* discardDeckRef = &discardDeck;
     auto* cardsToBuy_2Ref = &cardsToBuy_2;
+    auto* cardsToBuy_4Ref = &cardsToBuy_4;
     auto* skipRef = &skip;
     auto* duelistUsedCardRef = &duelistTurnActionDone;
     auto* playerUsedCardRef = &playerTurnActionDone;
@@ -619,7 +631,7 @@ void GameplayScene::PlayMatch()
     auto* wildPlayedRef = &wildPlayed;
 
     auto use_card_func = 
-        [discardDeckRef, duelistUsedCardRef, cardsToBuy_2Ref, skipRef, playerUsedCardRef, dirRef, winnerRef, playerTurnRef, wildPlayedRef]
+        [discardDeckRef, duelistUsedCardRef, cardsToBuy_2Ref, cardsToBuy_4Ref, skipRef, playerUsedCardRef, dirRef, winnerRef, playerTurnRef, wildPlayedRef]
         (std::shared_ptr<Duelist> duelist, std::vector<Card>& container, int cardIndex, bool isPlayer)
     {
 
@@ -632,11 +644,17 @@ void GameplayScene::PlayMatch()
 
         // can use if has same color, or numbered card same number
         //
-        if (*cardsToBuy_2Ref > 0 
-            && card.typeID != Card::DRAW_2 
+        if (*cardsToBuy_4Ref > 0
             && card.typeID != Card::WILD_DRAW_4) {
             return;
         }
+        else {
+            if (*cardsToBuy_2Ref > 0
+                && card.typeID != Card::DRAW_2) {
+                return;
+            }
+        }
+
 
 
         // can use if has same color, or numbered card same number
@@ -680,7 +698,7 @@ void GameplayScene::PlayMatch()
                 && *playerTurnRef == false)
                 *wildPlayedRef = true;
 
-            *cardsToBuy_2Ref += 4;
+            *cardsToBuy_4Ref += 4;
         }
 
         // add to discardDeck
@@ -856,6 +874,12 @@ void GameplayScene::PlayMatch()
                     duelistTurnActionDone = false;
                 }
                 else {
+                    if (cardsToBuy_4 > 0) {
+                        for (size_t i = 0; i < cardsToBuy_4; i++) {
+                            DrawCard(duelists[currentDuelistIndex]->hand->deck);
+                        }
+                        cardsToBuy_4 = 0;
+                    }
                     if (cardsToBuy_2 > 0) {
                         for (size_t i = 0; i < cardsToBuy_2; i++) {
                             DrawCard(duelists[currentDuelistIndex]->hand->deck);
