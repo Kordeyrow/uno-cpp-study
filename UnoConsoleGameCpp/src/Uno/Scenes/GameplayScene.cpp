@@ -1,6 +1,7 @@
 #include <iostream>
 #include <sstream>
 #include "Uno/Scenes/GameplayScene.h"
+#include <chrono>
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
@@ -433,10 +434,49 @@ void GameplayScene::DrawTable(UserInterface* ui, int current_duelist_index, bool
     ui->SetScene(screenData.str());
 }
 
-void WaitForAnyKeyOrDelay() {
+void GameplayScene::WaitForAnyKeyOrDelay(UserInterface* matchUI) {
+
+    using namespace std::chrono;
+    auto start = high_resolution_clock::now();
+    auto now = start;
+    duration<double> elapsed_seconds;
+    int elapsed_int_seconds = 0;
+    float waitingTimeSeconds = 1.1f; 
+
+    while (true) {
+
+        auto fetchedInput = _kbhit();
+
+        if (fetchedInput) {
+
+            if (matchUI) {
+                matchUI->ReadOptionAndExecute(fetchedInput, true);
+                //lastOptionIndex = matchUI->currentSelectedIndex;
+                //DrawTable(&matchUI, 0, false);
+                while (_kbhit())
+                    _getch();
+            }
+
+            //break;
+        }
+
+        now = high_resolution_clock::now();
+
+        //elapsed_seconds = end - start;
+        elapsed_seconds = duration_cast<duration<float>>(now - start);
+        // If more than one second has passed
+        if (elapsed_seconds.count() >= waitingTimeSeconds) {
+            break;
+        }
+    }
+
+    /*while (i < 60) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(15));
 
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+        i++;
+    }*/
 
     //auto input = _getch();
     //if (input == (char)224) {
@@ -460,8 +500,44 @@ void WaitForAnyKey() {
 }
 
 void GameplayScene::DrawCard(std::vector<Card>& target) {
-    if (drawDeck.size() == 0)
-        return;
+    //if (drawDeck.size() == 0) {
+    //    
+    //    // move all cards from discardDeck to drawDeck but not topCard
+    //    Card topCard = std::move(discardDeck.back());
+
+    //    for (size_t i = 0; i < discardDeck.size(); i++)
+    //    {
+
+    //    }
+
+    //    //return;
+    //}
+
+    if (drawDeck.size() == 0) {
+        if (discardDeck.size() <= 1) {
+            // Handle the case where there are not enough cards to move
+            // This could be an error or end-of-game situation
+            throw std::runtime_error("Not enough cards to replenish draw deck");
+        }
+
+        // Temporarily hold the top card
+        Card topCard = std::move(discardDeck.back());
+        discardDeck.pop_back();
+
+        // Move all remaining cards from discardDeck to drawDeck
+        std::move(discardDeck.begin(), discardDeck.end(), std::back_inserter(drawDeck));
+        discardDeck.clear(); // Clear the source deck
+
+        ShuffleDeck(drawDeck);
+
+        // Put the top card back on the discardDeck
+        discardDeck.push_back(std::move(topCard));
+    }
+
+    if (drawDeck.empty()) {
+        throw std::runtime_error("No cards left to draw after attempting to replenish");
+    }
+
     Card card = std::move(drawDeck.back()); // Move the top card into 'card'
     drawDeck.pop_back(); // This is now safe; 'card' is no longer tied to the 'matchDeck'
     target.push_back(card);
@@ -626,18 +702,18 @@ void GameplayScene::PlayMatch()
         {
             auto& card = player_deck[i];
             matchUI.AddUserOptions({
-                   std::make_shared<UserOptionData>(
-                       card.ColoredDescription(),
-                       SIMPLE_FUNC_REF(use_card_func, player, player_deck, i, true)
-                   )
-                });
+                std::make_shared<UserOptionData>(
+                    card.ColoredDescription(),
+                    SIMPLE_FUNC_REF(use_card_func, player, player_deck, i, true)
+                )
+            });
         }
         matchUI.AddUserOptions({
-               std::make_shared<UserOptionData>(
-                   "Draw Card",
-                   MEMBER_FUNC_REF(PlayerOptionDrawCard)
-               )
-            });
+            std::make_shared<UserOptionData>(
+                "Draw Card",
+                MEMBER_FUNC_REF(PlayerOptionDrawCard)
+            )
+        });
 
         // As options reset, selection was lost
         //
@@ -647,7 +723,7 @@ void GameplayScene::PlayMatch()
         if (playerTurnActionDone) {
 
             DrawTable(&matchUI, 0, false);
-            WaitForAnyKeyOrDelay();
+            WaitForAnyKeyOrDelay(&matchUI);
 
             playerTurnActionDone = false;
             duelistTurnActionDone = false;
@@ -675,7 +751,7 @@ void GameplayScene::PlayMatch()
                 }
 
                 DrawTable(&matchUI, currentDuelistIndex, false);
-                WaitForAnyKeyOrDelay();
+                WaitForAnyKeyOrDelay(&matchUI);
 
                 // Give total (duelistInitialHandSize) cards 
                 //  for each duelist, from shuffled matchDeck
@@ -713,7 +789,7 @@ void GameplayScene::PlayMatch()
                 }
 
                 DrawTable(&matchUI, currentDuelistIndex, false);
-                WaitForAnyKeyOrDelay();
+                WaitForAnyKeyOrDelay(&matchUI);
 
                 currentDuelistIndex += dir;
                 if (currentDuelistIndex >= duelists.size())
@@ -734,7 +810,6 @@ void GameplayScene::PlayMatch()
             else {
                 matchUI.ReadOptionAndExecute();
                 lastOptionIndex = matchUI.currentSelectedIndex;
-
                 DrawTable(&matchUI, 0, false);
                 //SafeGetChar();
             }

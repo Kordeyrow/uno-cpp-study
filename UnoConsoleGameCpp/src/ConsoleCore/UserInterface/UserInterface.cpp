@@ -290,7 +290,7 @@ void UserInterface::ReadOptionAndExecute(char input, bool thread) {
 
 	// Input
 	//
-	if (input == -1) {
+	if (input == -1 || thread) {
 		input = ReadInputKey();
 	}
 	int chosenOptionIndex = -1;
@@ -299,6 +299,10 @@ void UserInterface::ReadOptionAndExecute(char input, bool thread) {
 	//
 	if (ArrowMoveSelection(input))
 		return;
+
+	if (thread) {
+		return;
+	}
 
 	// Execute chosen
 	//
