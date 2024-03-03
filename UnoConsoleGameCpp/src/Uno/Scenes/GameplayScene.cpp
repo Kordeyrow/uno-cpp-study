@@ -451,6 +451,7 @@ void GameplayScene::WaitForAnyKeyOrDelay(UserInterface* matchUI) {
 
             if (matchUI) {
                 matchUI->ReadOptionAndExecute(fetchedInput, true);
+                matchUI->ShowOptions();
                 //lastOptionIndex = matchUI->currentSelectedIndex;
                 //DrawTable(&matchUI, 0, false);
                 while (_kbhit())
@@ -500,18 +501,6 @@ void WaitForAnyKey() {
 }
 
 void GameplayScene::DrawCard(std::vector<Card>& target) {
-    //if (drawDeck.size() == 0) {
-    //    
-    //    // move all cards from discardDeck to drawDeck but not topCard
-    //    Card topCard = std::move(discardDeck.back());
-
-    //    for (size_t i = 0; i < discardDeck.size(); i++)
-    //    {
-
-    //    }
-
-    //    //return;
-    //}
 
     if (drawDeck.size() == 0) {
         if (discardDeck.size() <= 1) {

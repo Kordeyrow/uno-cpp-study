@@ -271,6 +271,8 @@ bool UserInterface::ArrowMoveSelection(char input)
 				currentSelectedIndex = (currentSelectedIndex + moveSelectedIndex) % optionFromKey.size();
 			}
 			SetUserMessage("");
+			while (_kbhit())
+				_getch();
 			return true;
 		}
 	}
@@ -301,6 +303,8 @@ void UserInterface::ReadOptionAndExecute(char input, bool thread) {
 		return;
 
 	if (thread) {
+		while (_kbhit())
+			_getch();
 		return;
 	}
 
@@ -364,7 +368,7 @@ void UserInterface::SetState(UserInterface stateCopy)
 	//return *this;
 }
 
-auto UserInterface::Draw() -> void
+auto UserInterface::Draw(int indexStart) -> void
 {
 
 	// Build screenData

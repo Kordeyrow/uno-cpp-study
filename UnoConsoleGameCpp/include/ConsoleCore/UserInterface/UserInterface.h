@@ -30,7 +30,7 @@ public:
         }
     }
 
-    auto Draw() -> void;
+    auto Draw(int indexStart = 0) -> void;
 
     auto SetTitle(const std::string& title) -> void;
     auto SetScene(const std::string& scene) -> void;
