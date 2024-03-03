@@ -737,6 +737,11 @@ void GameplayScene::PlayMatch()
         }
     }
 
+    int notDraw_4Count = 1;
+
+    while (drawDeck.back().typeID != Card::NUMBERED) {
+        DrawCard(discardDeck);
+    }
     DrawCard(discardDeck);
 
     // Print MatchDeck
