@@ -436,12 +436,25 @@ void GameplayScene::DrawTable(UserInterface* ui, int current_duelist_index, bool
 
 void GameplayScene::WaitForAnyKeyOrDelay(UserInterface* matchUI) {
 
+    // Step by step
+    //
+    //auto input = _getch();
+    //if (input == (char)224) {
+    //    // Move selected index
+    //    //
+    //    auto input = _getch();
+    //}
+    //while (_kbhit())
+    //    _getch();
+    //return;
+
+
     using namespace std::chrono;
     auto start = high_resolution_clock::now();
     auto now = start;
     duration<double> elapsed_seconds;
     int elapsed_int_seconds = 0;
-    float waitingTimeSeconds = 1.1f; 
+    //float waitingTimeSeconds = 1.1f; 
 
     while (true) {
 
@@ -466,27 +479,10 @@ void GameplayScene::WaitForAnyKeyOrDelay(UserInterface* matchUI) {
         //elapsed_seconds = end - start;
         elapsed_seconds = duration_cast<duration<float>>(now - start);
         // If more than one second has passed
-        if (elapsed_seconds.count() >= waitingTimeSeconds) {
+        if (elapsed_seconds.count() >= turnActionDelay) {
             break;
         }
     }
-
-    /*while (i < 60) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(15));
-
-
-
-        i++;
-    }*/
-
-    //auto input = _getch();
-    //if (input == (char)224) {
-    //    // Move selected index
-    //    //
-    //    auto input = _getch();
-    //}
-    //while (_kbhit())
-    //    _getch();
 }
 
 void WaitForAnyKey() {
@@ -500,7 +496,7 @@ void WaitForAnyKey() {
         _getch();
 }
 
-void GameplayScene::DrawCard(std::vector<Card>& target) {
+void GameplayScene::DrawCard(std::vector<Card>& targetDeck) {
 
     if (drawDeck.size() == 0) {
         if (discardDeck.size() <= 1) {
@@ -529,7 +525,13 @@ void GameplayScene::DrawCard(std::vector<Card>& target) {
 
     Card card = std::move(drawDeck.back()); // Move the top card into 'card'
     drawDeck.pop_back(); // This is now safe; 'card' is no longer tied to the 'matchDeck'
-    target.push_back(card);
+    targetDeck.push_back(card);
+
+    if (&targetDeck == &duelists[0]->hand->deck) {
+        if (targetDeck.size() > 1 && playerSaidUno == true) {
+            playerSaidUno == false;
+        }
+    }
 }
 
 void GameplayScene::PlayerOptionDrawCard() {
@@ -547,6 +549,10 @@ void GameplayScene::PlayerOptionDrawCard() {
     playerTurnActionDone = true;
 }
 
+void GameplayScene::SayUno() {
+    playerSaidUno = true;
+    matchUII->currentSelectedIndex = matchUII->currentSelectedIndex - 1;
+}
 
 void GameplayScene::PlayMatch()
 {
@@ -584,7 +590,7 @@ void GameplayScene::PlayMatch()
     // MatchUI
     //
     UserInterface matchUI = *userInterface; // Keep state (only change copy)
-
+    matchUII = &matchUI;
 
     // ======( )  use_card_func  ( )====== //
     //                                     
@@ -664,6 +670,10 @@ void GameplayScene::PlayMatch()
         for (size_t card_count = 0; card_count < duelistInitialHandSize; card_count++)
         {
             DrawCard(duelists[duelist_index]->hand->deck);
+            /*if (duelist_index > 0) {
+                DrawCard(duelists[duelist_index]->hand->deck);
+
+            }*/
         }
     }
 
@@ -687,23 +697,49 @@ void GameplayScene::PlayMatch()
         matchUI.ClearOptions();
         auto& player = duelists[0];
         auto& player_deck = player->hand->deck;
-        for (size_t i = 0; i < player_deck.size(); i++)
-        {
-            auto& card = player_deck[i];
+
+        if (duelists[0]->hand->deck.size() > 2)
+            playerSaidUno = false;
+
+        if (duelists[0]->hand->deck.size() == 1 && playerSaidUno == false && playerTurnActionDone == false) {
+
             matchUI.AddUserOptions({
                 std::make_shared<UserOptionData>(
-                    card.ColoredDescription(),
-                    SIMPLE_FUNC_REF(use_card_func, player, player_deck, i, true)
+                    "Draw Card (You forgot to say 'UNO!')",
+                    MEMBER_FUNC_REF(PlayerOptionDrawCard)
                 )
             });
+            matchUI.currentSelectedIndex = 0;
+            playerSaidUno = false;
         }
-        matchUI.AddUserOptions({
-            std::make_shared<UserOptionData>(
-                "Draw Card",
-                MEMBER_FUNC_REF(PlayerOptionDrawCard)
-            )
-        });
+        else {
+            for (size_t i = 0; i < player_deck.size(); i++)
+            {
+                auto& card = player_deck[i];
+                matchUI.AddUserOptions({
+                    std::make_shared<UserOptionData>(
+                        card.ColoredDescription(),
+                        SIMPLE_FUNC_REF(use_card_func, player, player_deck, i, true)
+                    )
+                    });
+            }
+            matchUI.AddUserOptions({
+                std::make_shared<UserOptionData>(
+                    "Draw Card",
+                    MEMBER_FUNC_REF(PlayerOptionDrawCard)
+                )
+                });
 
+            if (duelists[0]->hand->deck.size() == 2 && playerSaidUno == false)
+            {
+                matchUI.AddUserOptions({
+                    std::make_shared<UserOptionData>(
+                        "UNO!",
+                        MEMBER_FUNC_REF(SayUno)
+                    )
+                    });
+            }
+        }
         // As options reset, selection was lost
         //
         matchUI.currentSelectedIndex = lastOptionIndex;
@@ -712,7 +748,9 @@ void GameplayScene::PlayMatch()
         if (playerTurnActionDone) {
 
             DrawTable(&matchUI, 0, false);
-            WaitForAnyKeyOrDelay(&matchUI);
+            if (skip == false) {
+                WaitForAnyKeyOrDelay(&matchUI);
+            }
 
             playerTurnActionDone = false;
             duelistTurnActionDone = false;
@@ -786,6 +824,22 @@ void GameplayScene::PlayMatch()
             }
         }
 
+        if (duelists[0]->hand->deck.size() == 1 && playerSaidUno == false && playerTurnActionDone == false) {
+
+            matchUI.ClearOptions();
+            auto& player = duelists[0];
+            auto& player_deck = player->hand->deck;
+
+            matchUI.AddUserOptions({
+                std::make_shared<UserOptionData>(
+                    "Draw Card (You forgot to say 'UNO!')",
+                    MEMBER_FUNC_REF(PlayerOptionDrawCard)
+                )
+            });
+            matchUI.currentSelectedIndex = 0;
+            playerSaidUno = false;
+            matchUI.ShowOptions();
+        }
 
         DrawTable(&matchUI, 0, false);
         

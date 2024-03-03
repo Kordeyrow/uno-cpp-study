@@ -15,13 +15,12 @@ void SetScreenSize() {
     HWND console = GetConsoleWindow();
     RECT r;
     GetWindowRect(console, &r); //stores the console's current dimensions
-
     MoveWindow(console, r.left, r.top, 850, 650, TRUE);
 }
 
 UnoSceneManager::UnoSceneManager() {
-    HideCursor();
     SetScreenSize();
+    HideCursor();
     currentScene = std::make_shared<MainMenuScene>();
     currentScene->Init();
 }

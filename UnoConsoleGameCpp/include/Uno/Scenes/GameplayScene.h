@@ -34,6 +34,20 @@ public:
 
         std::vector<Card>& deck = *new std::vector<Card>();
 
+
+        /*for (size_t i = 0; i < 1; i++)
+        {
+            for (size_t j = 0; j < 80; j++)
+            {
+                deck.emplace_back(
+                    Card::NUMBERED,
+                    Card::colors[i],
+                    1
+                );
+            }
+        }
+        return deck;*/
+
         // numbered cards (80 total), 20 for each color
         //
         for (size_t i = 0; i < 4; i++)
@@ -47,7 +61,6 @@ public:
                     Card::colors[i],
                     j % 10
                 );
-                //std::cout << std::to_string(j % 10) + "/" << i << "  ";
             }
         }
 
@@ -63,7 +76,6 @@ public:
                     Card::DRAW_2,
                     Card::colors[i]
                 );
-                //std::cout << "draw+2/" << i << "  ";
             }
         }
 
@@ -79,7 +91,6 @@ public:
                     Card::REVERSE,
                     Card::colors[i]
                 );
-                //std::cout << "draw+2/" << i << "  ";
             }
         }
 
@@ -95,7 +106,6 @@ public:
                     Card::SKIP,
                     Card::colors[i]
                 );
-                //std::cout << "draw+2/" << i << "  ";
             }
         }
 
@@ -120,12 +130,19 @@ public:
 
 private:
 
+    bool playerSaidUno = false;
+    bool playerJustSaidUno = false;
+
     int maxDuelists = 12;
     int minDuelists = 2;
     int startDuelists = 4;
     int duelistInitialHandSize = 7;
-    int turnActionDelay = 1900;
+    float turnActionDelay = 1.3;
 
+    UserInterface* matchUII;
+
+    void UpdateOptions();
+    void SayUno();
     void WaitForAnyKeyOrDelay(UserInterface* matchUI = nullptr);
     void DrawCard(std::vector<Card>& target);
     void PlayerOptionDrawCard();

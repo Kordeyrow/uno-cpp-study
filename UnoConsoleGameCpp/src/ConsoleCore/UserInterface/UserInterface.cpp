@@ -18,6 +18,8 @@
 #define CHOSEN_HIGHLIGHT "\x1b[1;30;106m"
 #define RESET_HIGHLIGHT "\x1b[0m"
 
+bool changed;
+
 std::string NumberToAlpha(int number) {
 	if (number < 0 || number > 35) {
 		throw std::invalid_argument("Number out of valid range (0-35)");
@@ -62,7 +64,8 @@ void UserInterface::AddUserOptions(const std::vector<std::shared_ptr<UserOptionD
 		optionInputNumber++;
 	}
 
-	Draw();
+	changed = true;
+	//Draw();
 }
 
 void UserInterface::ClearOptions() {
@@ -273,6 +276,7 @@ bool UserInterface::ArrowMoveSelection(char input)
 			SetUserMessage("");
 			while (_kbhit())
 				_getch();
+			changed = true;
 			return true;
 		}
 	}
@@ -370,6 +374,9 @@ void UserInterface::SetState(UserInterface stateCopy)
 
 auto UserInterface::Draw(int indexStart) -> void
 {
+	/*if (changed == false)
+		return;*/
+	changed = false;
 
 	// Build screenData
 	// 
@@ -388,22 +395,27 @@ auto UserInterface::Draw(int indexStart) -> void
 auto UserInterface::SetTitle(const std::string& _title) -> void
 {
 	title = _title;
+	changed = true;
 	Draw();
 }
 auto UserInterface::SetScene(const std::string& _scene) -> void
 {
 	scene = _scene;
+	changed = true;
 	Draw();
 }
 auto UserInterface::SetUserOptions(const std::string& _userOptions) -> void
 {
 	userOptions = _userOptions;
+	changed = true;
 	Draw();
 }
 auto UserInterface::SetUserMessage(const std::string& _userMessage) -> void
 {
 	userMessage = _userMessage;
 	Draw();
+
+	changed = true;
 }
 
 auto UserInterface::AddTitle(const std::string& _title) -> void
