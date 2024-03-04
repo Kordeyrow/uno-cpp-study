@@ -109,17 +109,14 @@ public:
             }
         }
 
-        // "wild_draw+4" cards (4 total), 1 for each color
+        // "wild_draw+4" cards (4 total)
         //
-        for (size_t i = 0; i < 20; i++)
+        for (size_t i = 0; i < 4; i++)
         {
-            // 2 cards of each
-            //
             deck.emplace_back(
                 Card::WILD_DRAW_4,
                 Card::NONE
             );
-            //std::cout << "draw+2/" << i << "  ";
         }
 
         //_getch();
@@ -135,7 +132,7 @@ private:
     bool playerSaidUno = false;
     bool playerJustSaidUno = false;
 
-    int maxDuelists = 12;
+    int maxDuelists = 10;
     int minDuelists = 2;
     int startDuelists = 4;
     int duelistInitialHandSize = 7;
@@ -148,6 +145,7 @@ private:
     void WaitForAnyKeyOrDelay(UserInterface* matchUI = nullptr);
     void DrawCard(std::vector<Card>& target);
     void PlayerOptionDrawCard();
+
     void DrawDuelist(
         const Duelist& duelist, 
         int x, 
@@ -156,6 +154,7 @@ private:
         bool highlight,
         bool winner,
         bool gameover);
+
     void PrintTopCard(int centerX, int centerY, std::vector<std::string>& asciiTable);
     //Card discardPileTopCard;
     bool endSetPlayers = false;
@@ -184,7 +183,7 @@ private:
     
     //int moveRightCountDrawTable = 0;
     std::vector<std::shared_ptr<Duelist>> duelists;
-    std::vector<Card> drawDeck = ShuffleDeck(CreateMatchDeck());
+    std::vector<Card> drawDeck = ShuffleDeck(ShuffleDeck(CreateMatchDeck()));
 
     std::vector<Card>& ShuffleDeck(std::vector<Card>& deck) {
         // Create a random number generator

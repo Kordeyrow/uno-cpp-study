@@ -2,6 +2,7 @@
 #include <sstream>
 #include "Uno/Scenes/GameplayScene.h"
 #include <chrono>
+#include <numeric> // For std::iota
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
@@ -169,7 +170,7 @@ void GameplayScene::SetPlayersNames() {
 
 void GameplayScene::IncreaseTotalDuelists() {
     if (duelists.size() < maxDuelists)
-        duelists.emplace_back(std::make_shared<Duelist>("Duelist " + std::to_string(duelists.size() - 1) , duelistInitialHandSize));
+        duelists.emplace_back(std::make_shared<Duelist>("Duelist " + std::to_string(duelists.size()+1) , duelistInitialHandSize));
 }
 
 void GameplayScene::DecreaseTotalDuelists() {
@@ -371,28 +372,31 @@ void GameplayScene::DrawTable(UserInterface* ui, int current_duelist_index, bool
     
     const int tableWidth = 86;
     const int tableHeight = 32;
-    std::vector<std::string> screenBuffer(tableHeight, std::string(tableWidth, ' '));
+    std::vector<std::string> pixelsTable(tableHeight, std::string(tableWidth, ' '));
     zeroWidthCharactersByRow.clear();
 
+    // Find center
+    //
     int centerX = tableWidth / 2;
     int centerY = tableHeight / 2;
 
-    double startAngle = 3 * M_PI / 2;
-         
-    int totalPlayers = duelists.size();
+    // Calculate radius X Y 
+    //
+    double startAngle = 3 * M_PI / 2;         
+    int totalDuelists = duelists.size();
+    double radiusScaleFactor = 0.5 + 0.04 * (totalDuelists - 1);
+    int radiusX = (centerX - 10) * radiusScaleFactor;
+    int radiusY = (centerY - 5) * radiusScaleFactor * 2;
 
-    double radiusScaleFactor = 0.5 + 0.04 * (duelists.size() - 1);
-    int radiusX = static_cast<int>((centerX - 10) * radiusScaleFactor);
-    int radiusY = static_cast<int>((centerY - 5) * radiusScaleFactor * 2);
+    // Print
+    //
+    PrintTopCard(centerX, centerY, pixelsTable);
+    
+    // Calculate duelists posistion
+    //
+    for (int i = 0; i < totalDuelists; ++i) {
 
-    PrintTopCard(centerX, centerY, screenBuffer);
-
-
-    // ======    ======
-
-
-    for (int i = 0; i < totalPlayers; ++i) {
-        double angle = startAngle - (2 * M_PI * i / totalPlayers);
+        double angle = startAngle - (2 * M_PI * i / totalDuelists);
         if (angle < 0) angle += 2 * M_PI;
 
         int x = static_cast<int>(centerX + radiusX * cos(angle));
@@ -405,34 +409,30 @@ void GameplayScene::DrawTable(UserInterface* ui, int current_duelist_index, bool
             *duelists[i], 
             x, 
             y, 
-            screenBuffer, 
+            pixelsTable, 
             (i == current_duelist_index) || gameIsOver,
             duelistIsWinner,
             gameIsOver);
     }
 
     // Determine the first and last rows with content
-    int firstRowWithContent = screenBuffer.size(), lastRowWithContent = 0;
-    for (int i = 0; i < screenBuffer.size(); ++i) {
-        if (!IsStringEmpty(screenBuffer[i])) {
+    //
+    int firstRowWithContent = pixelsTable.size(), lastRowWithContent = 0;
+    for (int i = 0; i < pixelsTable.size(); ++i) {
+        if (!IsStringEmpty(pixelsTable[i])) {
             firstRowWithContent = std::min(firstRowWithContent, i);
             lastRowWithContent = i;
         }
     }
 
-
-    // ======    ======
-    
-
-    // DrawLine();
-
+    // Draw screen
+    //
     std::stringstream screenData;
     screenData << std::endl;
     for (int i = firstRowWithContent; i <= lastRowWithContent; ++i) {
-        screenData << screenBuffer[i] << std::endl;
+        screenData << pixelsTable[i] << std::endl;
     }
     screenData << std::endl;
-    //DrawLine();
 
     ui->SetScene(screenData.str());
 }
@@ -506,9 +506,8 @@ void GameplayScene::DrawCard(std::vector<Card>& targetDeck) {
 
     if (drawDeck.size() == 0) {
         if (discardDeck.size() <= 1) {
-            // Handle the case where there are not enough cards to move
-            // This could be an error or end-of-game situation
-            throw std::runtime_error("Not enough cards to replenish draw deck");
+            // not enough cards
+            return;
         }
 
         // Temporarily hold the top card
@@ -578,6 +577,7 @@ void GameplayScene::SayUno() {
     publicSharedMatchUI->currentSelectedIndex = publicSharedMatchUI->currentSelectedIndex - 1;
 }
 
+
 void GameplayScene::PlayMatch()
 {
     // Reset game
@@ -586,24 +586,41 @@ void GameplayScene::PlayMatch()
     cardsToBuy_2 = 0;
     cardsToBuy_4 = 0;
     skip = false;
-    //discardColorID;
     endSetPlayers = false;
     dir = 1;
     playerTurnActionDone = false;
     duelistTurnActionDone = false;
+
     auto duelistsCopy = duelists;
     duelists = {};
 
-    for (size_t i = 0; i < duelistsCopy.size(); i++)
-    {
-        duelists.emplace_back(std::make_shared<Duelist>(duelistsCopy[i]->name, duelistInitialHandSize));
-    }
+    // Add Player (first duelist which is the player, will always be on table bottom)
+    //
+    duelists.emplace_back(std::make_shared<Duelist>(duelistsCopy[0]->name, duelistInitialHandSize));
 
-    /*duelists.emplace_back(std::make_shared<Duelist>("Player", duelistInitialHandSize));
-    for (size_t i = 0; i < startDuelists - 1; i++)
-    {
-        duelists.emplace_back(std::make_shared<Duelist>("Duelist " + std::to_string(i), duelistInitialHandSize));
-    }*/
+    // Add adversaries
+    //
+    // Start from 1 to skip the player at index 0
+    std::vector<int> indexes(duelistsCopy.size() - 1);
+    std::iota(indexes.begin(), indexes.end(), 1); // Fill with 1, 2, 3, ..., n-1
+
+    std::random_device rd;
+    std::mt19937 g(rd());
+
+    while (!indexes.empty()) {
+        // Randomly pick an index from the vector of indexes
+        std::uniform_int_distribution<> dis(0, indexes.size() - 1);
+        int randomIndex = dis(g);
+        int randomDuelistIndex = indexes[randomIndex];
+        auto& randomDuelist = duelistsCopy[randomDuelistIndex];
+        auto randomDuelistName = duelistsCopy[randomDuelistIndex]->name;
+
+        // Use the picked index to add a duelist from duelistsCopy to duelists
+        duelists.emplace_back(std::make_shared<Duelist>(randomDuelistName, duelistInitialHandSize));
+
+        // Remove the used index from the indexes vector to avoid repetition
+        indexes.erase(indexes.begin() + randomIndex);
+    }
 
 
     drawDeck = ShuffleDeck(CreateMatchDeck());

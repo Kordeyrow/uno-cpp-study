@@ -15,7 +15,7 @@ void SetScreenSize() {
     HWND console = GetConsoleWindow();
     RECT r;
     GetWindowRect(console, &r); //stores the console's current dimensions
-    MoveWindow(console, r.left, r.top, 850, 650, TRUE);
+    MoveWindow(console, r.left, r.top, 900, 650, TRUE);
 }
 
 UnoSceneManager::UnoSceneManager() {
