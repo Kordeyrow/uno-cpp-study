@@ -75,7 +75,7 @@ void UserInterface::ClearOptions() {
 
 void UserInterface::ShowOptions(int selectedIndex, bool chosen)
 {
-	if (selectedIndex == -1)
+	if (selectedIndex < 0)
 		selectedIndex = currentSelectedIndex;
 
 	// Build options text

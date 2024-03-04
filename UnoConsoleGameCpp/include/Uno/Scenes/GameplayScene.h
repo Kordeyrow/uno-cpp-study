@@ -111,7 +111,7 @@ public:
 
         // "wild_draw+4" cards (4 total), 1 for each color
         //
-        for (size_t i = 0; i < 40; i++)
+        for (size_t i = 0; i < 20; i++)
         {
             // 2 cards of each
             //

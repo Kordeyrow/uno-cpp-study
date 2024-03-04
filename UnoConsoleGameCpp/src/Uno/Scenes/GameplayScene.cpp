@@ -633,25 +633,25 @@ void GameplayScene::PlayMatch()
 
     auto use_card_func = 
         [discardDeckRef, duelistUsedCardRef, cardsToBuy_2Ref, cardsToBuy_4Ref, skipRef, playerUsedCardRef, dirRef, winnerRef, playerTurnRef, wildPlayedRef, publicSharedMatchUIRef]
-        (std::shared_ptr<Duelist> duelist, std::vector<Card>& container, int cardIndex, bool isPlayer)
+        (std::shared_ptr<Duelist> duelist, std::vector<Card>& duelistDeck, int cardIndex, bool isPlayer)
     {
 
         if (discardDeckRef->size() == 0)
             return;
 
 
-        auto& card = container[cardIndex];
+        auto& useTryCard = duelistDeck[cardIndex];
 
 
         // can use if has same color, or numbered card same number
         //
         if (*cardsToBuy_4Ref > 0
-            && card.typeID != Card::WILD_DRAW_4) {
+            && useTryCard.typeID != Card::WILD_DRAW_4) {
             return;
         }
         else {
             if (*cardsToBuy_2Ref > 0
-                && card.typeID != Card::DRAW_2) {
+                && useTryCard.typeID != Card::DRAW_2) {
                 return;
             }
         }
@@ -660,89 +660,104 @@ void GameplayScene::PlayMatch()
 
         // can use if has same color, or numbered card same number
         //
-        if (card.typeID == Card::NUMBERED) {
-            if (card.number != discardDeckRef->back().number 
-                && card.colorID != discardDeckRef->back().colorID
+        if (useTryCard.typeID == Card::NUMBERED) {
+            if (useTryCard.number != discardDeckRef->back().number 
+                && useTryCard.colorID != discardDeckRef->back().colorID
                 && discardDeckRef->back().colorID != Card::ALL) {
                 return;
             }
         }
 
-        if ((discardDeckRef->back().colorID != Card::ALL && card.colorID != discardDeckRef->back().colorID)
-            && (card.typeID != discardDeckRef->back().typeID)
-            && card.typeID != Card::WILD_DRAW_4) {
+        if ((discardDeckRef->back().colorID != Card::ALL && useTryCard.colorID != discardDeckRef->back().colorID)
+            && (useTryCard.typeID != discardDeckRef->back().typeID)
+            && useTryCard.typeID != Card::WILD_DRAW_4) {
             return;
         }
 
         if (isPlayer 
             && *playerTurnRef == false
-            && card.typeID != Card::WILD_DRAW_4)
+            && useTryCard.typeID != Card::WILD_DRAW_4)
             return;
 
 
         //aaa
 
-        if (card.typeID == Card::SKIP) {
+        if (useTryCard.typeID == Card::SKIP) {
             *skipRef = true;
         }
 
-        if (card.typeID == Card::DRAW_2) {
+        if (useTryCard.typeID == Card::DRAW_2) {
             *cardsToBuy_2Ref += 2;
         }
 
-        if (card.typeID == Card::REVERSE) {
+        if (useTryCard.typeID == Card::REVERSE) {
             *dirRef *= -1;
         }
 
-        if (card.typeID == Card::WILD_DRAW_4) {
-            if (isPlayer
-                && *playerTurnRef == false)
-                *wildPlayedRef = true;
+        if (useTryCard.typeID == Card::WILD_DRAW_4) {
 
             *cardsToBuy_4Ref += 4;
 
+            if (isPlayer) {
+                if (*playerTurnRef == false) {
+                    *wildPlayedRef = true;
+                }
 
-            // CHOSE COLOR
-            //
-            //UserInterface matchUI = *userInterface; // Keep state (only change copy)
-            UserInterface choseColorUI = **publicSharedMatchUIRef;
+                // CHOSE COLOR
+                //
+                //UserInterface matchUI = *userInterface; // Keep state (only change copy)
+                UserInterface choseColorUI = **publicSharedMatchUIRef;
 
-            int color = 0;
-            /*auto chose_color_func =
-                [&color]
-            ()
-            {
-                color = 31;
-            }*/
+                int lastOptionIndex = 0;
+                int color = 0;
 
-            choseColorUI.ClearOptions();
-            choseColorUI.AddUserOptions({
-                std::make_shared<UserOptionData>(
-                    "Red",
-                    [&color]() { color = 32; }
-                )
-                });
-            choseColorUI.ShowOptions();
-
-            choseColorUI.ReadOptionAndExecute();
-
-            //choseColorUI.currentSelectedIndex = 0;
-            //playerSaidUno = false;
+                while (color == 0) {
+                    choseColorUI.ClearOptions();
+                    choseColorUI.AddUserOptions(
+                        {
+                            std::make_shared<UserOptionData>(
+                                Card::DoColorBGText("  ", Card::RED),
+                                [&color]() { color = Card::RED; }
+                            ),
+                            std::make_shared<UserOptionData>(
+                                Card::DoColorBGText("  ", Card::YELLOW),
+                                [&color]() { color = Card::YELLOW; }
+                            ),
+                            std::make_shared<UserOptionData>(
+                                Card::DoColorBGText("  ", Card::BLUE),
+                                [&color]() { color = Card::BLUE; }
+                            ),
+                            std::make_shared<UserOptionData>(
+                                Card::DoColorBGText("  ", Card::GREEN),
+                                [&color]() { color = Card::GREEN; }
+                            ),
+                        }
+                    );
+                    choseColorUI.ShowOptions();
+                    choseColorUI.currentSelectedIndex = lastOptionIndex;
+                    choseColorUI.ReadOptionAndExecute();
+                    lastOptionIndex = choseColorUI.currentSelectedIndex;
+                }
+                useTryCard.colorID = color;
+            }
+            else {
+                useTryCard.colorID = Card::GetRandomColorCode();
+            }
         }
 
         // add to discardDeck
         //
-        discardDeckRef->push_back(card);
+        discardDeckRef->push_back(useTryCard);
 
         // remove from play deck1
         //
-        container.erase(container.begin() + cardIndex);
+        duelistDeck.erase(duelistDeck.begin() + cardIndex);
 
         *duelistUsedCardRef = true;
         if (isPlayer)
             *playerUsedCardRef = true;
 
-        if (container.size() == 0) {
+        if (duelistDeck.size() == 0) {
             *winnerRef = duelist;
         }
     };

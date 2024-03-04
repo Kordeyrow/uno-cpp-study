@@ -54,11 +54,19 @@ public:
 
 	constexpr static int colors[4] = { RED, GREEN, YELLOW, BLUE };
 
+
+	static std::string DoColorBGText(std::string s, int colorID) {
+		colorID += 10; // +10 because background ranges grom 40 to 49 / foreground 30 to 39
+		std::string colorCSI = "\x1b[1;" + std::to_string(colorID) + "m"; // +10 because background ranges grom 40 to 49 / foreground 30 to 39
+		std::string resetColorCSI = "\x1b[0m";
+		return colorCSI + s + resetColorCSI;
+	}
+	
 	std::string RawDescription() { return " " + description + " "; }
-	std::string ColoredDescription() { return startColor + " " + description + " " + resetColor; }
+	std::string ColoredDescription() { return ColorCSI() + RawDescription() + ResetColorCSI(); }
 	//std::string ColoredDescriptionFixed() { return startColor + " " + description + " " + resetColor; }
-	std::string startColor = "\x1b[1;" + std::to_string(colorID + 10) + "m"; // +10 because background ranges grom 40 to 49 / foreground 30 to 39
-	std::string resetColor = "\x1b[0m";
+	std::string ColorCSI() { return "\x1b[1;" + std::to_string(colorID + 10) + "m"; } // +10 because background ranges grom 40 to 49 / foreground 30 to 39
+	std::string ResetColorCSI() { return "\x1b[0m"; }
 
 	static int GetRandomColorCode() {
         static std::random_device rd; // Obtain a random number from hardware
