@@ -54,7 +54,7 @@ public:
         {
             // 2 cards of each number 0-9
             //
-            for (size_t j = 0; j < 20; j++)
+            for (size_t j = 0; j < 10; j++)
             {
                 deck.emplace_back(
                     Card::NUMBERED,
@@ -127,16 +127,16 @@ public:
 
 private:
 
-    bool wildPlayed = false;
-
-    bool playerSaidUno = false;
-    bool playerJustSaidUno = false;
-
     int maxDuelists = 10;
     int minDuelists = 2;
     int startDuelists = 4;
     int duelistInitialHandSize = 7;
-    float turnActionDelay = 1.3;
+    float turnActionDelay = 1.5;
+    bool shuffle = true;
+
+    bool wildPlayed = false;
+    bool playerSaidUno = false;
+    bool playerJustSaidUno = false;
 
     UserInterface* publicSharedMatchUI;
 
@@ -183,7 +183,7 @@ private:
     
     //int moveRightCountDrawTable = 0;
     std::vector<std::shared_ptr<Duelist>> duelists;
-    std::vector<Card> drawDeck = ShuffleDeck(ShuffleDeck(CreateMatchDeck()));
+    std::vector<Card> drawDeck = shuffle ? ShuffleDeck(ShuffleDeck(CreateMatchDeck())) : CreateMatchDeck();
 
     std::vector<Card>& ShuffleDeck(std::vector<Card>& deck) {
         // Create a random number generator

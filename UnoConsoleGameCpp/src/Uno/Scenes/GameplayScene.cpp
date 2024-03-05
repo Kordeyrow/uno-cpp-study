@@ -517,8 +517,9 @@ void GameplayScene::DrawCard(std::vector<Card>& targetDeck) {
         // Move all remaining cards from discardDeck to drawDeck
         std::move(discardDeck.begin(), discardDeck.end(), std::back_inserter(drawDeck));
         discardDeck.clear(); // Clear the source deck
-
-        ShuffleDeck(drawDeck);
+        
+        if (shuffle)
+            ShuffleDeck(drawDeck);
 
         // Put the top card back on the discardDeck
         discardDeck.push_back(std::move(topCard));
@@ -623,7 +624,7 @@ void GameplayScene::PlayMatch()
     }
 
 
-    drawDeck = ShuffleDeck(CreateMatchDeck());
+    drawDeck = shuffle ? ShuffleDeck(CreateMatchDeck()) : CreateMatchDeck();
 
     // winner
     winner = nullptr;
@@ -967,16 +968,17 @@ void GameplayScene::PlayMatch()
                     currentDuelistIndex = 0;
             }
         }
+        //
+        // End AI turns
 
-        // End duelists turns
-
-        //aaa
+        // WildPlayed
         if (wildPlayed) {
             playerTurn = false;
             wildPlayed = false;
         }
-        else
+        else {
             playerTurn = skip == false;
+        }
         skip = false;
 
         // UNO Busted! (player didnt say uno)
@@ -1002,7 +1004,10 @@ void GameplayScene::PlayMatch()
 
         DrawTable(&matchUI, 0, false);
         
-        if (winner == nullptr && playerTurn) {
+        // Player turn
+        //
+        
+        if (bool playerShoulPlay = winner == nullptr && playerTurn) {
             // Skip? Player 
             //
             if (skip && wildPlayed) {

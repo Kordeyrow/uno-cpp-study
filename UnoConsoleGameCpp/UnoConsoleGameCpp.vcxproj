@@ -141,7 +141,7 @@
     <ClCompile Include="src\ConsoleCore\BaseScene\BaseScene.cpp" />
     <ClCompile Include="src\EntryPoint.cpp" />
     <ClCompile Include="src\Uno\Scenes\MainMenuScene.cpp" />
-    <ClCompile Include="src\Uno\UnoSceneManager.cpp" />
+    <ClCompile Include="src\Uno\ScenesManager.cpp" />
     <ClCompile Include="src\ConsoleCore\UserInterface\UserOptionData.cpp" />
     <ClCompile Include="src\ConsoleCore\UserInterface\UserInterface.cpp" />
     <ClCompile Include="src\ConsoleCore\UserInterface\UserOption.cpp" />
@@ -155,7 +155,7 @@
     <ClInclude Include="include\Uno\Scenes\GameplayScene.h" />
     <ClInclude Include="include\ConsoleCore\BaseScene\BaseScene.h" />
     <ClInclude Include="include\Uno\Scenes\MainMenuScene.h" />
-    <ClInclude Include="include\Uno\UnoSceneManager.h" />
+    <ClInclude Include="include\Uno\ScenesManager.h" />
     <ClInclude Include="include\ConsoleCore\UserInterface\UserOptionData.h" />
     <ClInclude Include="include\ConsoleCore\UserInterface\UserInterface.h" />
     <ClInclude Include="include\ConsoleCore\UserInterface\UserOption.h" />

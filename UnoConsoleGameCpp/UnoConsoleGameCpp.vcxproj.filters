@@ -72,7 +72,7 @@
     <ClCompile Include="src\EntryPoint.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Uno\UnoSceneManager.cpp">
+    <ClCompile Include="src\Uno\ScenesManager.cpp">
       <Filter>Source Files\UnoSystem</Filter>
     </ClCompile>
     <ClCompile Include="src\ConsoleCore\BaseScene\BaseScene.cpp">
@@ -96,9 +96,27 @@
     <ClCompile Include="src\ConsoleCore\UserInterface\UserOptionHolder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Uno\Match\Entities\Components\Card.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Uno\Match\Entities\Components\CardAction.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Uno\Match\Entities\Components\Hand.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Uno\Match\Entities\Duelist.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Uno\Scenes\GameplayScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Uno\Match\MatchSceneView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Uno\UnoSceneManager.h">
+    <ClInclude Include="include\Uno\ScenesManager.h">
       <Filter>Header Files\UnoSystem</Filter>
     </ClInclude>
     <ClInclude Include="include\ConsoleCore\BaseScene\BaseScene.h">
@@ -120,6 +138,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\ConsoleCore\UserInterface\UserOptionHolder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Uno\Match\Entities\Components\Card.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Uno\Match\Entities\Components\CardAction.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Uno\Match\Entities\Components\Hand.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Uno\Match\Entities\Duelist.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Uno\Scenes\GameplayScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Uno\Match\MatchSceneView.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

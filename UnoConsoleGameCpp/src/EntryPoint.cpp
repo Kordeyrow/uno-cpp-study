@@ -1,8 +1,8 @@
-#include "Uno/UnoSceneManager.h"
+#include "Uno/ScenesManager.h"
 #include <windows.h>
 
 int main()
 {
-    UnoSceneManager uno;
-    uno.Run();
+    ScenesManager scenesManager;
+    scenesManager.Run();
 }

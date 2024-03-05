@@ -1,6 +1,6 @@
 #include <iostream>
 #include <windows.h>
-#include "Uno/UnoSceneManager.h"
+#include "Uno/ScenesManager.h"
 #include "Uno/Scenes/MainMenuScene.h"
 
 void HideCursor() {
@@ -18,14 +18,14 @@ void SetScreenSize() {
     MoveWindow(console, r.left, r.top, 900, 650, TRUE);
 }
 
-UnoSceneManager::UnoSceneManager() {
+ScenesManager::ScenesManager() {
     SetScreenSize();
     HideCursor();
     currentScene = std::make_shared<MainMenuScene>();
     currentScene->Init();
 }
 
-auto UnoSceneManager::Run() -> void 
+auto ScenesManager::Run() -> void 
 {
     while (currentScene) {
         auto nextScene = currentScene->Run();
