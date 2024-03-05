@@ -70,6 +70,9 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(IncludePath)</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -104,6 +107,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -127,7 +131,37 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="UnoConsoleGameCpp.cpp" />
+    <ClCompile Include="src\Uno\Match\Entities\Components\Card.cpp" />
+    <ClCompile Include="src\Uno\Match\Entities\Components\CardAction.cpp" />
+    <ClCompile Include="src\Uno\Match\Entities\Components\Hand.cpp" />
+    <ClCompile Include="src\Uno\Match\Entities\Duelist.cpp" />
+    <ClCompile Include="src\Uno\Scenes\GameplayScene.cpp" />
+    <ClCompile Include="src\Uno\Match\MatchSceneView.cpp" />
+    <ClCompile Include="src\Uno\Match\MatchSetupMenu.cpp" />
+    <ClCompile Include="src\ConsoleCore\BaseScene\BaseScene.cpp" />
+    <ClCompile Include="src\EntryPoint.cpp" />
+    <ClCompile Include="src\Uno\Scenes\MainMenuScene.cpp" />
+    <ClCompile Include="src\Uno\ScenesManager.cpp" />
+    <ClCompile Include="src\ConsoleCore\UserInterface\UserOptionData.cpp" />
+    <ClCompile Include="src\ConsoleCore\UserInterface\UserInterface.cpp" />
+    <ClCompile Include="src\ConsoleCore\UserInterface\UserOption.cpp" />
+    <ClCompile Include="src\ConsoleCore\UserInterface\UserOptionHolder.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\Uno\Match\Entities\Components\Card.h" />
+    <ClInclude Include="include\Uno\Match\Entities\Components\CardAction.h" />
+    <ClInclude Include="include\Uno\Match\Entities\Components\Hand.h" />
+    <ClInclude Include="include\Uno\Match\Entities\Duelist.h" />
+    <ClInclude Include="include\Uno\Scenes\GameplayScene.h" />
+    <ClInclude Include="include\ConsoleCore\BaseScene\BaseScene.h" />
+    <ClInclude Include="include\Uno\Scenes\MainMenuScene.h" />
+    <ClInclude Include="include\Uno\ScenesManager.h" />
+    <ClInclude Include="include\ConsoleCore\UserInterface\UserOptionData.h" />
+    <ClInclude Include="include\ConsoleCore\UserInterface\UserInterface.h" />
+    <ClInclude Include="include\ConsoleCore\UserInterface\UserOption.h" />
+    <ClInclude Include="include\Uno\Match\MatchSetupMenu.h" />
+    <ClInclude Include="include\ConsoleCore\UserInterface\UserOptionHolder.h" />
+    <ClInclude Include="include\Uno\Match\MatchSceneView.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
